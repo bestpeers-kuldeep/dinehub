@@ -1,7 +1,7 @@
 class MenuItem < ApplicationRecord
   belongs_to :menu_category
 
-  has_one_attached :photo
+  
 
   delegate :drink_type, to: :menu_category, allow_nil: true
 

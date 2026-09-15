@@ -29,14 +29,25 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
+  # App / Active Storage URLs — set APP_HOST to your ngrok domain, e.g. abc123.ngrok-free.app
+  app_host = ENV.fetch("APP_HOST", "localhost")
+  app_protocol = ENV.fetch("APP_PROTOCOL", "http")
+  default_url_options = { host: app_host, protocol: app_protocol }
+  default_url_options[:port] = ENV.fetch("APP_PORT", "3000").to_i if app_host == "localhost"
+
+  Rails.application.routes.default_url_options = default_url_options
+  config.action_mailer.default_url_options = default_url_options
+
+  # Allow ngrok tunnels (and whatever APP_HOST is set to)
+  config.hosts << app_host unless app_host == "localhost"
+  config.hosts << /[a-z0-9-]+\.ngrok(-free)?\.(app|dev)/
+  config.hosts << /[a-z0-9-]+\.ngrok\.io/
+
   # Don't care if the mailer can't send.
   config.action_mailer.raise_delivery_errors = false
 
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false
-
-  # Set localhost to be used by links generated in mailer templates.
-  config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
