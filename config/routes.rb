@@ -9,6 +9,7 @@ Rails.application.routes.draw do
       resources :menu_categories, only: %i[index show]
       resources :menu_items, only: %i[index show]
       resources :events, only: %i[index show]
+      resources :tables, only: %i[index show]
       get "specials", to: "specials#index"
     end
   end
