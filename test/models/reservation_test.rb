@@ -5,42 +5,41 @@ class ReservationTest < ActiveSupport::TestCase
     @table = tables(:table_one)
     @date = Date.new(2026, 9, 16)
     @guest = {
-      first_name: "Alex",
-      last_name: "Guest",
+      full_name: "Alex Guest",
       email: "alex@example.com",
       phone: "555-0100"
     }
   end
 
-  test "11:30 slot leaves 12:00, 12:30, and 1pm free" do
-    Reservation.create!(
+  test "11:30 slot holds the table for two hours" do
+    TableReservation.create!(
       table: @table,
       reservation_date: @date,
       start_time: "11:30",
       **@guest
     )
 
-    assert_equal "12:00", Reservation.last.estimated_end_time.strftime("%H:%M")
+    assert_equal "13:30", TableReservation.last.estimated_end_time.strftime("%H:%M")
     assert_not @table.available_between?(@date, "11:30")
-    assert @table.available_between?(@date, "12:00")
-    assert @table.available_between?(@date, "12:30")
-    assert @table.available_between?(@date, "13:00")
+    assert_not @table.available_between?(@date, "12:00")
+    assert_not @table.available_between?(@date, "12:30")
+    assert_not @table.available_between?(@date, "13:00")
+    assert @table.available_between?(@date, "13:30")
   end
 
   test "rejects a second booking in the same 30-minute slot" do
-    Reservation.create!(
+    TableReservation.create!(
       table: @table,
       reservation_date: @date,
       start_time: "11:30",
       **@guest
     )
 
-    overlap = Reservation.new(
+    overlap = TableReservation.new(
       table: @table,
       reservation_date: @date,
       start_time: "11:30",
-      first_name: "Sam",
-      last_name: "Guest",
+      full_name: "Sam Guest",
       email: "sam@example.com",
       phone: "555-0101"
     )
@@ -49,20 +48,19 @@ class ReservationTest < ActiveSupport::TestCase
     assert_includes overlap.errors[:base], "table is already booked around this arrival time"
   end
 
-  test "allows a later slot on the same table" do
-    Reservation.create!(
+  test "allows a slot after the two-hour window on the same table" do
+    TableReservation.create!(
       table: @table,
       reservation_date: @date,
       start_time: "11:30",
       **@guest
     )
 
-    later = Reservation.new(
+    later = TableReservation.new(
       table: @table,
       reservation_date: @date,
-      start_time: "12:30",
-      first_name: "Sam",
-      last_name: "Guest",
+      start_time: "13:30",
+      full_name: "Sam Guest",
       email: "sam@example.com",
       phone: "555-0101"
     )
@@ -71,7 +69,7 @@ class ReservationTest < ActiveSupport::TestCase
   end
 
   test "rejects start times that are not 30-minute slots" do
-    reservation = Reservation.new(
+    reservation = TableReservation.new(
       table: @table,
       reservation_date: @date,
       start_time: "11:15",

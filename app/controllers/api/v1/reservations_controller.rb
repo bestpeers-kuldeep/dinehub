@@ -8,7 +8,7 @@ module Api
         end
 
         reservation = nil
-        Reservation.transaction do
+        TableReservation.transaction do
           table = Table.lock_available_for(
             location: location,
             date: reservation_params[:reservation_date],
@@ -42,13 +42,13 @@ module Api
       end
 
       def party_size
-          params[:capacity].presence || params.dig(:reservation, :capacity)
+        params[:capacity].presence || params.dig(:reservation, :capacity)
       end
 
       def reservation_params
         permitted = %i[
           location reservation_date start_time capacity
-          first_name last_name email phone occasion special_requests
+          first_name last_name email phone occasion special_requests marketing_opt_in
         ]
         if params[:reservation].present?
           params.require(:reservation).permit(permitted)
@@ -58,7 +58,9 @@ module Api
       end
 
       def guest_params
-        reservation_params.except(:location, :capacity)
+        reservation_params.except(:location, :capacity, :first_name, :last_name).merge(
+          full_name: Reservations::FullName.from(reservation_params)
+        )
       end
     end
   end

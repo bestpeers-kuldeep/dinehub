@@ -11,12 +11,11 @@ class Api::V1::TablesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "returns available table counts by location without table names" do
-    Reservation.create!(
+    TableReservation.create!(
       table: tables(:table_one),
       reservation_date: @date,
       start_time: "18:00",
-      first_name: "Alex",
-      last_name: "Guest",
+      full_name: "Alex Guest",
       email: "alex@example.com",
       phone: "555-0100"
     )

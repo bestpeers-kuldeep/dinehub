@@ -11,6 +11,8 @@ Rails.application.routes.draw do
       resources :events, only: %i[index show]
       resources :tables, only: %i[index]
       resources :reservations, only: %i[create]
+      resources :parties_reservations, only: %i[create]
+      resources :catering_reservations, only: %i[create]
       get "specials", to: "specials#index"
     end
   end

@@ -257,17 +257,16 @@ puts "Seeded events: #{Event.count}, event_items: #{EventItem.count}"
 puts "Seeded tables: #{Table.count}"
 
 # --- Reservations ---
-# Cocktail Bar 1 is booked 11:30–12:00 today; 12:30 and 13:00 stay free.
+# Cocktail Bar 1 is booked 11:30–13:30 today; 13:30 stays free.
 cocktail_bar_one = Table.find_by!(name: "Cocktail Bar 1")
 unless cocktail_bar_one.reservations.overlapping(Date.current, "11:30").exists?
   cocktail_bar_one.reservations.create!(
     reservation_date: Date.current,
     start_time: "11:30",
-    first_name: "Alex",
-    last_name: "Guest",
+    full_name: "Alex Guest",
     email: "alex@example.com",
     phone: "555-0100"
   )
 end
 
-puts "Seeded reservations: #{Reservation.count}"
+puts "Seeded table reservations: #{TableReservation.count}"

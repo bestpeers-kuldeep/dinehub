@@ -1,7 +1,7 @@
 class Table < ApplicationRecord
   enum :location, { "Cocktail Bar": 0, "Covered Patio": 1, "Dining Room": 2, "Snug": 3 }
 
-  has_many :reservations, dependent: :destroy
+  has_many :reservations, class_name: "TableReservation", dependent: :destroy
 
   validates :name, presence: true, uniqueness: true
   validates :location, presence: true
@@ -36,7 +36,7 @@ class Table < ApplicationRecord
     scope = for_party(capacity)
     scope = scope.where(location: location) if location.present?
 
-    booked_ids = Reservation.overlapping(date, start_time).select(:table_id)
+    booked_ids = TableReservation.overlapping(date, start_time).select(:table_id)
     available_counts = scope.where.not(id: booked_ids).group(:location).count
 
     location_names = location.present? ? Array(location) : locations.keys

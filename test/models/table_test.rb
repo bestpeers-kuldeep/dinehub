@@ -23,22 +23,24 @@ class TableTest < ActiveSupport::TestCase
 
   test "availability by location omits tables already booked in that slot" do
     date = Date.new(2026, 9, 16)
-    Reservation.create!(
+    TableReservation.create!(
       table: tables(:table_one),
       reservation_date: date,
       start_time: "11:30",
-      first_name: "Alex",
-      last_name: "Guest",
+      full_name: "Alex Guest",
       email: "alex@example.com",
       phone: "555-0100"
     )
 
     booked_slot = Table.availability_by_location(date: date, start_time: "11:30")
-    later_slot = Table.availability_by_location(date: date, start_time: "12:30")
+    overlapping_slot = Table.availability_by_location(date: date, start_time: "12:30")
+    later_slot = Table.availability_by_location(date: date, start_time: "13:30")
     cocktail_booked = booked_slot.find { |row| row[:location] == "Cocktail Bar" }
+    cocktail_overlapping = overlapping_slot.find { |row| row[:location] == "Cocktail Bar" }
     cocktail_later = later_slot.find { |row| row[:location] == "Cocktail Bar" }
 
     assert_equal 1, cocktail_booked[:available_tables]
+    assert_equal 1, cocktail_overlapping[:available_tables]
     assert_equal 2, cocktail_later[:available_tables]
   end
 end

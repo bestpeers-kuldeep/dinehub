@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_131113) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_17_122900) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -93,20 +93,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_131113) do
   end
 
   create_table "reservations", force: :cascade do |t|
+    t.decimal "budget_per_person", precision: 10, scale: 2
+    t.string "company"
     t.datetime "created_at", null: false
+    t.text "description"
+    t.string "duration"
     t.string "email", null: false
-    t.string "first_name", null: false
-    t.string "last_name", null: false
-    t.integer "occasion"
+    t.string "full_name"
+    t.boolean "marketing_opt_in", default: false, null: false
+    t.integer "number_of_people"
+    t.string "occasion"
     t.string "phone", null: false
     t.date "reservation_date", null: false
+    t.string "source"
     t.text "special_requests"
     t.time "start_time", null: false
-    t.bigint "table_id", null: false
+    t.bigint "table_id"
+    t.string "type", default: "TableReservation", null: false
     t.datetime "updated_at", null: false
-    t.index ["table_id", "reservation_date", "start_time"], name: "index_reservations_on_table_date_start", unique: true
+    t.index ["table_id", "reservation_date", "start_time"], name: "index_reservations_on_table_date_start", unique: true, where: "(table_id IS NOT NULL)"
     t.index ["table_id", "reservation_date"], name: "index_reservations_on_table_id_and_reservation_date"
     t.index ["table_id"], name: "index_reservations_on_table_id"
+    t.index ["type"], name: "index_reservations_on_type"
   end
 
   create_table "tables", force: :cascade do |t|
