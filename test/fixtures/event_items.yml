@@ -1,7 +1,15 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+one:
+  title: Live Music Night
+  description: Local band performing acoustic sets
+  event: one
+  event_date: 2026-09-16
+  start_time: "19:00"
+  end_time: "22:00"
 
-one: {}
-# column: value
-#
-two: {}
-# column: value
+two:
+  title: Match Day Screening
+  description: Big-screen football match
+  event: two
+  event_date: 2026-09-15
+  start_time: "17:00"
+  end_time: "20:00"

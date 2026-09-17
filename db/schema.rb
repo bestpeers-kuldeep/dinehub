@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_15_121723) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_15_131113) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -92,6 +92,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_121723) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "reservations", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.string "first_name", null: false
+    t.string "last_name", null: false
+    t.integer "occasion"
+    t.string "phone", null: false
+    t.date "reservation_date", null: false
+    t.text "special_requests"
+    t.time "start_time", null: false
+    t.bigint "table_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["table_id", "reservation_date", "start_time"], name: "index_reservations_on_table_date_start", unique: true
+    t.index ["table_id", "reservation_date"], name: "index_reservations_on_table_id_and_reservation_date"
+    t.index ["table_id"], name: "index_reservations_on_table_id"
+  end
+
   create_table "tables", force: :cascade do |t|
     t.integer "capacity", null: false
     t.datetime "created_at", null: false
@@ -107,4 +124,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_15_121723) do
   add_foreign_key "event_items", "events"
   add_foreign_key "menu_categories", "menus"
   add_foreign_key "menu_items", "menu_categories"
+  add_foreign_key "reservations", "tables"
 end

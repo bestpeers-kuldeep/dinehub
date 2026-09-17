@@ -1,0 +1,14 @@
+table_one:
+  name: Table 1
+  capacity: 2
+  location: 0
+
+table_two:
+  name: Table 2
+  capacity: 4
+  location: 0
+
+vip_one:
+  name: VIP-1
+  capacity: 6
+  location: 1

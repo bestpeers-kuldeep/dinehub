@@ -1,0 +1,8 @@
+lunch_slot:
+  table: table_one
+  reservation_date: 2026-09-15
+  start_time: "11:30"
+  first_name: Alex
+  last_name: Guest
+  email: alex@example.com
+  phone: "555-0100"

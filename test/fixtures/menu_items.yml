@@ -1,11 +1,11 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+one:
+  name: Tomato Bruschetta
+  description: Toasted bread with tomatoes
+  price: 8.50
+  menu_category: one
 
-# This model initially had no columns defined. If you add columns to the
-# model remove the "{}" from the fixture names and add the columns immediately
-# below each fixture, per the syntax in the comments below
-#
-one: {}
-# column: value
-#
-two: {}
-# column: value
+two:
+  name: House Lager
+  description: Crisp draft lager, pint
+  price: 6.00
+  menu_category: two
