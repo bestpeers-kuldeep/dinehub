@@ -1,0 +1,112 @@
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f1ec;padding:32px 12px;font-family:Helvetica,Arial,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px;background-color:#ffffff;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background-color:#1f2a24;padding:32px 32px 28px;text-align:center;">
+            <div style="font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#c9a86a;">DineHub</div>
+            <div style="font-size:26px;font-weight:bold;color:#ffffff;padding-top:10px;">We've recorded your <%= @kind_label.capitalize %> Request</div>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:32px 32px 8px;">
+            <p style="margin:0;font-size:16px;color:#1f2a24;">Hi <%= @reservation.full_name %>,</p>
+            <p style="margin:14px 0 0;font-size:15px;line-height:24px;color:#4a5450;">
+              Thank you for reaching out. Your <%= @kind_label %> request has been recorded with our reservations team.
+              Our team will contact you soon to confirm the next steps.
+            </p>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:24px 32px 8px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#faf8f5;border:1px solid #ece7de;border-radius:8px;">
+              <tr>
+                <td style="padding:20px 24px 4px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#9a938a;"><%= @kind_label %> details</td>
+              </tr>
+              <tr>
+                <td style="padding:8px 24px 20px;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:15px;color:#1f2a24;">
+                    <tr>
+                      <td style="padding:8px 0;color:#6b7370;width:40%;">Guest</td>
+                      <td style="padding:8px 0;font-weight:bold;"><%= @reservation.full_name %></td>
+                    </tr>
+                    <% if @reservation.company.present? %>
+                      <tr>
+                        <td style="padding:8px 0;color:#6b7370;border-top:1px solid #ece7de;">Company</td>
+                        <td style="padding:8px 0;font-weight:bold;border-top:1px solid #ece7de;"><%= @reservation.company %></td>
+                      </tr>
+                    <% end %>
+                    <tr>
+                      <td style="padding:8px 0;color:#6b7370;border-top:1px solid #ece7de;">Date</td>
+                      <td style="padding:8px 0;font-weight:bold;border-top:1px solid #ece7de;"><%= @reservation.reservation_date.to_date.strftime("%A, %B %-d, %Y") %></td>
+                    </tr>
+                    <tr>
+                      <td style="padding:8px 0;color:#6b7370;border-top:1px solid #ece7de;">Start time</td>
+                      <td style="padding:8px 0;font-weight:bold;border-top:1px solid #ece7de;"><%= @reservation.parsed_start_time.strftime("%-l:%M %p") %></td>
+                    </tr>
+                    <tr>
+                      <td style="padding:8px 0;color:#6b7370;border-top:1px solid #ece7de;">Duration</td>
+                      <td style="padding:8px 0;font-weight:bold;border-top:1px solid #ece7de;"><%= @reservation.duration %></td>
+                    </tr>
+                    <tr>
+                      <td style="padding:8px 0;color:#6b7370;border-top:1px solid #ece7de;">Guests</td>
+                      <td style="padding:8px 0;font-weight:bold;border-top:1px solid #ece7de;"><%= @reservation.number_of_people %></td>
+                    </tr>
+                    <tr>
+                      <td style="padding:8px 0;color:#6b7370;border-top:1px solid #ece7de;">Budget per person</td>
+                      <td style="padding:8px 0;font-weight:bold;border-top:1px solid #ece7de;"><%= number_to_currency(@reservation.budget_per_person) %></td>
+                    </tr>
+                    <tr>
+                      <td style="padding:8px 0;color:#6b7370;border-top:1px solid #ece7de;">Occasion</td>
+                      <td style="padding:8px 0;font-weight:bold;border-top:1px solid #ece7de;"><%= @reservation.occasion %></td>
+                    </tr>
+                    <% if @reservation.id.present? %>
+                      <tr>
+                        <td style="padding:8px 0;color:#6b7370;border-top:1px solid #ece7de;">Reference</td>
+                        <td style="padding:8px 0;font-weight:bold;border-top:1px solid #ece7de;">#<%= @reservation.id %></td>
+                      </tr>
+                    <% end %>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <% if @reservation.description.present? %>
+          <tr>
+            <td style="padding:16px 32px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-left:3px solid #c9a86a;background-color:#fdfbf7;border-radius:4px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#9a938a;">Notes</div>
+                    <div style="padding-top:8px;font-size:15px;line-height:23px;color:#1f2a24;"><%= @reservation.description %></div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        <% end %>
+
+        <tr>
+          <td style="padding:24px 32px 32px;">
+            <p style="margin:0;font-size:14px;line-height:23px;color:#6b7370;">
+              This is not a confirmed booking yet. Our team will contact you at
+              <%= @reservation.email %> or <a href="tel:<%= @reservation.phone %>" style="color:#1f2a24;"><%= @reservation.phone %></a>
+              to finalize the details.
+            </p>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="background-color:#1f2a24;padding:22px 32px;text-align:center;">
+            <div style="font-size:14px;color:#ffffff;">We look forward to planning this with you.</div>
+            <div style="padding-top:6px;font-size:12px;color:#9aa5a0;">DineHub Restaurant &middot; Reservations Team</div>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>

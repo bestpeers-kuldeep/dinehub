@@ -1,6 +1,7 @@
 require "test_helper"
 
 class ReservationTest < ActiveSupport::TestCase
+  include ActionMailer::TestHelper
   setup do
     @table = tables(:table_one)
     @date = Date.new(2026, 9, 16)
@@ -66,6 +67,29 @@ class ReservationTest < ActiveSupport::TestCase
     )
 
     assert later.valid?
+  end
+
+  test "enqueues a confirmation email after the reservation is saved" do
+    assert_enqueued_emails 1 do
+      TableReservation.create!(
+        table: @table,
+        reservation_date: @date,
+        start_time: "11:30",
+        **@guest
+      )
+    end
+  end
+
+  test "does not enqueue email when the reservation is invalid" do
+    assert_no_enqueued_emails do
+      reservation = TableReservation.create(
+        table: @table,
+        reservation_date: @date,
+        start_time: "11:15",
+        **@guest
+      )
+      assert_not reservation.persisted?
+    end
   end
 
   test "rejects start times that are not 30-minute slots" do

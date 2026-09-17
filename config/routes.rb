@@ -16,4 +16,6 @@ Rails.application.routes.draw do
       get "specials", to: "specials#index"
     end
   end
+
+  mount LetterOpenerWeb::Engine, at: "/letter_opener" if Rails.env.development?
 end

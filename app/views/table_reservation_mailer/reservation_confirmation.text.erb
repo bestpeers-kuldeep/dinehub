@@ -1,0 +1,28 @@
+DINEHUB - YOUR TABLE IS BOOKED
+
+Hi <%= @reservation.full_name %>,
+
+Thank you for choosing us. Your reservation is confirmed.
+
+RESERVATION DETAILS
+Guest: <%= @reservation.full_name %>
+Location: <%= @reservation.location %>
+Date: <%= @reservation.reservation_date.to_date.strftime("%A, %B %-d, %Y") %>
+Arrival time: <%= @reservation.parsed_start_time.strftime("%-l:%M %p") %>
+<% if @reservation.occasion.present? %>
+Occasion: <%= @reservation.occasion %>
+<% end %>
+<% if @reservation.id.present? %>
+Reference: #<%= @reservation.id %>
+<% end %>
+<% if @reservation.special_requests.present? %>
+
+SPECIAL REQUESTS
+<%= @reservation.special_requests %>
+<% end %>
+
+Please arrive within 15 minutes of your booking time so we can hold your table.
+Need to change or cancel? Reply to this email or call us at 555-0100.
+
+We look forward to serving you.
+DineHub Restaurant - Reservations Team

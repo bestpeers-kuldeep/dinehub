@@ -1,6 +1,7 @@
 require "test_helper"
 
 class Api::V1::ReservationsControllerTest < ActionDispatch::IntegrationTest
+  include ActionMailer::TestHelper
   setup do
     @params = {
       location: "Cocktail Bar",
@@ -14,8 +15,10 @@ class Api::V1::ReservationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "creates a reservation against a hidden table in the location" do
-    assert_difference -> { Reservation.count }, 1 do
-      post "/api/v1/reservations", params: @params
+    assert_enqueued_emails 1 do
+      assert_difference -> { Reservation.count }, 1 do
+        post "/api/v1/reservations", params: @params
+      end
     end
 
     assert_response :created

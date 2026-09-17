@@ -14,6 +14,8 @@ class TableReservation < Reservation
 
   delegate :location, to: :table, allow_nil: true
 
+  after_create_commit :send_reservation_confirmation_email
+
   # Estimated leave time for availability checks only (not a DB column).
   def estimated_end_time
     parsed_start_time + ESTIMATED_DURATION
@@ -28,6 +30,10 @@ class TableReservation < Reservation
       .where("start_time < ?", sql_time(end_at))
       .where("start_time > ?", sql_time(window_start))
   }
+
+  def send_reservation_confirmation_email
+    TableReservationMailer.reservation_confirmation(self).deliver_later
+  end
 
   def as_public_json
     {

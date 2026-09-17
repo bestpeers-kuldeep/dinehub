@@ -1,6 +1,8 @@
 require "test_helper"
 
 class Api::V1::InquiryReservationsControllerTest < ActionDispatch::IntegrationTest
+  include ActionMailer::TestHelper
+
   setup do
     @params = {
       full_name: "Alex Guest",
@@ -19,8 +21,10 @@ class Api::V1::InquiryReservationsControllerTest < ActionDispatch::IntegrationTe
   end
 
   test "creates a parties reservation" do
-    assert_difference -> { PartiesReservation.count }, 1 do
-      post "/api/v1/parties_reservations", params: @params
+    assert_enqueued_emails 1 do
+      assert_difference -> { PartiesReservation.count }, 1 do
+        post "/api/v1/parties_reservations", params: @params
+      end
     end
 
     assert_response :created
@@ -46,8 +50,10 @@ class Api::V1::InquiryReservationsControllerTest < ActionDispatch::IntegrationTe
   end
 
   test "creates a catering reservation" do
-    assert_difference -> { CateringReservation.count }, 1 do
-      post "/api/v1/catering_reservations", params: @params.merge(company: "Northwind")
+    assert_enqueued_emails 1 do
+      assert_difference -> { CateringReservation.count }, 1 do
+        post "/api/v1/catering_reservations", params: @params.merge(company: "Northwind")
+      end
     end
 
     assert_response :created

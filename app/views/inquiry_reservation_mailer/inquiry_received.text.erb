@@ -1,0 +1,30 @@
+DINEHUB - WE'VE RECORDED YOUR <%= @kind_label.upcase %> 
+
+Hi <%= @reservation.full_name %>,
+
+Thank you for reaching out. Your <%= @kind_label %> request has been recorded with our reservations team. Our team will contact you soon.
+
+INQUIRY DETAILS
+Guest: <%= @reservation.full_name %>
+<% if @reservation.company.present? %>
+Company: <%= @reservation.company %>
+<% end %>
+Date: <%= @reservation.reservation_date.to_date.strftime("%A, %B %-d, %Y") %>
+Start time: <%= @reservation.parsed_start_time.strftime("%-l:%M %p") %>
+Duration: <%= @reservation.duration %>
+Guests: <%= @reservation.number_of_people %>
+Budget per person: <%= number_to_currency(@reservation.budget_per_person) %>
+Occasion: <%= @reservation.occasion %>
+<% if @reservation.id.present? %>
+Reference: #<%= @reservation.id %>
+<% end %>
+<% if @reservation.description.present? %>
+
+NOTES
+<%= @reservation.description %>
+<% end %>
+
+This is not a confirmed booking yet. Our team will contact you at <%= @reservation.email %> or <%= @reservation.phone %> to finalize the details.
+
+We look forward to planning this with you.
+DineHub Restaurant - Reservations Team

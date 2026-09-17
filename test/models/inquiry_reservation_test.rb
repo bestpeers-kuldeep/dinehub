@@ -1,6 +1,8 @@
 require "test_helper"
 
 class InquiryReservationTest < ActiveSupport::TestCase
+  include ActionMailer::TestHelper
+
   setup do
     @attrs = {
       full_name: "Alex Guest",
@@ -31,6 +33,25 @@ class InquiryReservationTest < ActiveSupport::TestCase
 
     assert_equal "CateringReservation", reservation.type
     assert_nil reservation.table_id
+  end
+
+  test "enqueues a party inquiry email after create" do
+    assert_enqueued_emails 1 do
+      PartiesReservation.create!(@attrs)
+    end
+  end
+
+  test "enqueues a catering inquiry email after create" do
+    assert_enqueued_emails 1 do
+      CateringReservation.create!(@attrs.merge(company: "Northwind"))
+    end
+  end
+
+  test "does not enqueue email when the inquiry is invalid" do
+    assert_no_enqueued_emails do
+      reservation = PartiesReservation.create(email: "alex@example.com", phone: "555-0100")
+      assert_not reservation.persisted?
+    end
   end
 
   test "requires inquiry fields" do

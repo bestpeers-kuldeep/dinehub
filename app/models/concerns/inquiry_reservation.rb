@@ -6,6 +6,16 @@ module InquiryReservation
     validates :duration, :budget_per_person, :occasion, :source, presence: true
     validates :budget_per_person, numericality: { greater_than: 0 }
     validates :number_of_people, numericality: { only_integer: true, greater_than: 0 }
+
+    after_create_commit :send_inquiry_received_email
+  end
+
+  def inquiry_kind
+    is_a?(CateringReservation) ? "catering" : "party"
+  end
+
+  def send_inquiry_received_email
+    InquiryReservationMailer.inquiry_received(self).deliver_later
   end
 
   def as_public_json
