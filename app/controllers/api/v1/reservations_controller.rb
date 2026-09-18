@@ -7,6 +7,11 @@ module Api
           return
         end
 
+        if missing_name_errors.any?
+          render json: { errors: missing_name_errors }, status: :unprocessable_entity
+          return
+        end
+
         reservation = nil
         TableReservation.transaction do
           table = Table.lock_available_for(
@@ -48,7 +53,7 @@ module Api
       def reservation_params
         permitted = %i[
           location reservation_date start_time capacity
-          first_name last_name email phone occasion special_requests marketing_opt_in
+          full_name first_name last_name email phone occasion special_requests marketing_opt_in
         ]
         if params[:reservation].present?
           params.require(:reservation).permit(permitted)
@@ -61,6 +66,21 @@ module Api
         reservation_params.except(:location, :capacity, :first_name, :last_name).merge(
           full_name: Reservations::FullName.from(reservation_params)
         )
+      end
+
+      # The API takes first_name/last_name, so report those rather than the
+      # full_name column they are stored in.
+      def missing_name_errors
+        @missing_name_errors ||= begin
+          if Reservations::FullName.from(reservation_params).present?
+            []
+          else
+            [
+              ("First name can't be blank" if reservation_params[:first_name].blank?),
+              ("Last name can't be blank" if reservation_params[:last_name].blank?)
+            ].compact
+          end
+        end
       end
     end
   end

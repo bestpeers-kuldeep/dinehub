@@ -15,6 +15,7 @@ allowed_origins = ENV.fetch("CORS_ORIGINS") {
   else
     "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://localhost:3001,https://#{ENV.fetch("APP_HOST")}"
   end
+  
 }.split(",").map(&:strip).compact_blank.freeze 
  
 Rails.application.config.allowed_cors_origins = allowed_origins

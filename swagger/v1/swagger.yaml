@@ -1,0 +1,719 @@
+openapi: 3.0.3
+info:
+  title: Dinehub API
+  version: v1
+  description: |
+    Restaurant public API. Use **Try it out** to call endpoints against this server.
+
+    Table reservations hold a 2-hour dining window. Arrival times must be on a 30-minute slot (e.g. `18:00`, `18:30`).
+servers:
+  - url: /
+    description: Current host
+tags:
+  - name: Menus
+  - name: Menu categories
+  - name: Menu items
+  - name: Specials
+  - name: Events
+  - name: Tables
+  - name: Reservations
+paths:
+  /api/v1/menus:
+    get:
+      tags: [Menus]
+      summary: List menus
+      operationId: listMenus
+      responses:
+        "200":
+          description: All menus
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Menu"
+  /api/v1/menus/{id}:
+    get:
+      tags: [Menus]
+      summary: Get a menu
+      operationId: getMenu
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Menu
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Menu"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/menu_categories:
+    get:
+      tags: [Menu categories]
+      summary: List menu categories
+      operationId: listMenuCategories
+      parameters:
+        - name: menu_id
+          in: query
+          schema:
+            type: integer
+          description: Filter by menu
+        - name: drink_type
+          in: query
+          schema:
+            $ref: "#/components/schemas/DrinkType"
+          description: Filter by drink type (drinks menu)
+      responses:
+        "200":
+          description: Categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MenuCategory"
+  /api/v1/menu_categories/{id}:
+    get:
+      tags: [Menu categories]
+      summary: Get a menu category
+      operationId: getMenuCategory
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Category
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuCategory"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/menu_items:
+    get:
+      tags: [Menu items]
+      summary: List menu items
+      operationId: listMenuItems
+      parameters:
+        - name: menu_category_id
+          in: query
+          schema:
+            type: integer
+        - name: drink_type
+          in: query
+          schema:
+            $ref: "#/components/schemas/DrinkType"
+          description: Filter items whose category has this drink type
+      responses:
+        "200":
+          description: Items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MenuItem"
+  /api/v1/menu_items/{id}:
+    get:
+      tags: [Menu items]
+      summary: Get a menu item
+      operationId: getMenuItem
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MenuItem"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/specials:
+    get:
+      tags: [Specials]
+      summary: List this week's specials
+      description: Fixed window from today through today + 6 days. No date query params.
+      operationId: listSpecials
+      responses:
+        "200":
+          description: Week specials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpecialsWeek"
+  /api/v1/events:
+    get:
+      tags: [Events]
+      summary: List events
+      operationId: listEvents
+      responses:
+        "200":
+          description: Events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Event"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /api/v1/events/{id}:
+    get:
+      tags: [Events]
+      summary: Get an event with items
+      operationId: getEvent
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Event including event_items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventWithItems"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: Event not found
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /api/v1/tables:
+    get:
+      tags: [Tables]
+      summary: Table availability by location
+      description: Returns available table **counts** per location. Table names are not exposed.
+      operationId: listTableAvailability
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2026-09-16"
+        - name: start_time
+          in: query
+          required: true
+          description: Arrival slot (`HH:MM`). Alias `time` is also accepted.
+          schema:
+            type: string
+            example: "18:00"
+        - name: location
+          in: query
+          schema:
+            $ref: "#/components/schemas/Location"
+        - name: capacity
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+          description: Only count tables that seat at least this many
+      responses:
+        "200":
+          description: Availability
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TableAvailability"
+        "400":
+          description: Missing or invalid date/time
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: date and start_time are required
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /api/v1/reservations:
+    post:
+      tags: [Reservations]
+      summary: Create a dining table reservation
+      description: |
+        Books a hidden table at the given location. Body may be a flat JSON object
+        or nested under `reservation`.
+      operationId: createReservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TableReservationRequest"
+            example:
+              location: Cocktail Bar
+              reservation_date: "2026-09-16"
+              start_time: "18:00"
+              capacity: 2
+              first_name: Alex
+              last_name: Guest
+              email: alex@example.com
+              phone: "555-0100"
+              occasion: Birthday
+              special_requests: Window seat
+              marketing_opt_in: false
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TableReservation"
+        "400":
+          description: Missing location, date, or time
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errors"
+        "409":
+          description: Concurrent booking claimed the last table
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errors"
+        "422":
+          description: Validation error or no tables available
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Errors"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /api/v1/parties_reservations:
+    post:
+      tags: [Reservations]
+      summary: Create a parties inquiry
+      description: Body may be flat JSON or nested under `parties_reservation` / `reservation`.
+      operationId: createPartiesReservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InquiryReservationRequest"
+            example:
+              full_name: Alex Guest
+              phone: "555-0100"
+              email: alex@example.com
+              company: Acme
+              reservation_date: "2026-09-16"
+              start_time: "18:00"
+              duration: 2 hours
+              budget_per_person: 45.00
+              number_of_people: 20
+              occasion: Birthday
+              description: Birthday dinner for 20
+              source: website
+              marketing_opt_in: false
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InquiryReservation"
+        "422":
+          $ref: "#/components/responses/Unprocessable"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /api/v1/catering_reservations:
+    post:
+      tags: [Reservations]
+      summary: Create a catering inquiry
+      description: Body may be flat JSON or nested under `catering_reservation` / `reservation`.
+      operationId: createCateringReservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InquiryReservationRequest"
+            example:
+              full_name: Alex Guest
+              phone: "555-0100"
+              email: alex@example.com
+              company: Northwind
+              reservation_date: "2026-09-16"
+              start_time: "18:00"
+              duration: 2 hours
+              budget_per_person: 45.00
+              number_of_people: 20
+              occasion: Birthday
+              description: Off-site catering for 20
+              source: website
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InquiryReservation"
+        "422":
+          $ref: "#/components/responses/Unprocessable"
+        "500":
+          $ref: "#/components/responses/ServerError"
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+  schemas:
+    DrinkType:
+      type: string
+      enum: [beer, wine, cocktails, spirits, whiskey]
+    Location:
+      type: string
+      enum: ["Cocktail Bar", "Covered Patio", "Dining Room", "Snug"]
+    MenuCategoryType:
+      type: string
+      enum: [our_menu, specials, drinks]
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+    Menu:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category_type:
+          $ref: "#/components/schemas/MenuCategoryType"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    MenuCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        menu_id:
+          type: integer
+        drink_type:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/DrinkType"
+        image_url:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    MenuItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        price:
+          type: string
+          example: "12.50"
+        start_at:
+          type: string
+          format: date-time
+          nullable: true
+        end_at:
+          type: string
+          format: date-time
+          nullable: true
+        menu_category_id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    SpecialsWeek:
+      type: object
+      properties:
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        menu:
+          nullable: true
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            category_type:
+              $ref: "#/components/schemas/MenuCategoryType"
+        menu_items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              description:
+                type: string
+                nullable: true
+              price:
+                type: string
+              start_at:
+                type: string
+                format: date-time
+                nullable: true
+              end_at:
+                type: string
+                format: date-time
+                nullable: true
+              menu_category_id:
+                type: integer
+              menu_category_name:
+                type: string
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    EventItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        event_id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        event_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          nullable: true
+        end_time:
+          type: string
+          nullable: true
+        logo_url:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    EventWithItems:
+      allOf:
+        - $ref: "#/components/schemas/Event"
+        - type: object
+          properties:
+            event_items:
+              type: array
+              items:
+                $ref: "#/components/schemas/EventItem"
+    TableAvailability:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        start_time:
+          type: string
+        locations:
+          type: array
+          items:
+            type: object
+            properties:
+              location:
+                $ref: "#/components/schemas/Location"
+              available_tables:
+                type: integer
+    TableReservationRequest:
+      type: object
+      required: [location, reservation_date, start_time]
+      properties:
+        location:
+          $ref: "#/components/schemas/Location"
+        reservation_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          example: "18:00"
+        capacity:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+        full_name:
+          type: string
+          description: Used if first/last name are omitted
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        occasion:
+          type: string
+        special_requests:
+          type: string
+        marketing_opt_in:
+          type: boolean
+    TableReservation:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          example: TableReservation
+        location:
+          $ref: "#/components/schemas/Location"
+        reservation_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+        estimated_end_time:
+          type: string
+        full_name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        occasion:
+          type: string
+          nullable: true
+        special_requests:
+          type: string
+          nullable: true
+        marketing_opt_in:
+          type: boolean
+    InquiryReservationRequest:
+      type: object
+      properties:
+        full_name:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+        company:
+          type: string
+        reservation_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+        duration:
+          type: string
+          example: 2 hours
+        budget_per_person:
+          type: number
+        number_of_people:
+          type: integer
+        occasion:
+          type: string
+        description:
+          type: string
+        source:
+          type: string
+        marketing_opt_in:
+          type: boolean
+    InquiryReservation:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          example: PartiesReservation
+        full_name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        company:
+          type: string
+          nullable: true
+        reservation_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+        duration:
+          type: string
+        budget_per_person:
+          type: string
+        number_of_people:
+          type: integer
+        occasion:
+          type: string
+        description:
+          type: string
+          nullable: true
+        source:
+          type: string
+        marketing_opt_in:
+          type: boolean
+  responses:
+    NotFound:
+      description: Record not found
+    Unprocessable:
+      description: Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Errors"
+    ServerError:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"

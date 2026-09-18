@@ -49,6 +49,15 @@ class Api::V1::InquiryReservationsControllerTest < ActionDispatch::IntegrationTe
     assert_equal true, body["marketing_opt_in"]
   end
 
+  test "creates a parties reservation from a json body" do
+    params = @params.except(:full_name).merge(first_name: "Sam", last_name: "Taylor")
+
+    post "/api/v1/parties_reservations", params: params, as: :json
+
+    assert_response :created
+    assert_equal "Sam Taylor", JSON.parse(response.body)["full_name"]
+  end
+
   test "creates a catering reservation" do
     assert_enqueued_emails 1 do
       assert_difference -> { CateringReservation.count }, 1 do

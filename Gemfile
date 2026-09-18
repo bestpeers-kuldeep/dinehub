@@ -37,6 +37,10 @@ gem "image_processing", "~> 1.2"
 # Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin Ajax possible
 gem "rack-cors"
 
+# Use Swagger for API documentation
+gem 'rswag-api'
+gem 'rswag-ui'
+
 group :development, :test do
   # Load .env into ENV for local development/test
   gem "dotenv-rails"

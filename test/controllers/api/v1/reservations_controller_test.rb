@@ -35,6 +35,32 @@ class Api::V1::ReservationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Alex Guest", TableReservation.last.full_name
   end
 
+  test "creates a reservation from a json body" do
+    post "/api/v1/reservations", params: @params, as: :json
+
+    assert_response :created
+    assert_equal "Alex Guest", JSON.parse(response.body)["full_name"]
+  end
+
+  test "reports the missing name fields the api accepts" do
+    post "/api/v1/reservations", params: @params.except(:first_name, :last_name), as: :json
+
+    assert_response :unprocessable_entity
+    errors = JSON.parse(response.body)["errors"]
+    assert_includes errors, "First name can't be blank"
+    assert_includes errors, "Last name can't be blank"
+    refute_includes errors, "Full name can't be blank"
+  end
+
+  test "accepts full_name on its own" do
+    params = @params.except(:first_name, :last_name).merge(full_name: "Alex Guest")
+
+    post "/api/v1/reservations", params: params, as: :json
+
+    assert_response :created
+    assert_equal "Alex Guest", JSON.parse(response.body)["full_name"]
+  end
+
   test "reduces location availability after a booking" do
     post "/api/v1/reservations", params: @params
     assert_response :created
