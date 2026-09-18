@@ -11,21 +11,29 @@ def seed_menu_items!(category, items)
   end
 end
 
-def seed_category_image!(category, filename)
-  image_path = Rails.root.join("db/seeds/images/#{filename}")
-  return unless image_path.exist?
-  return if category.image.attached? && category.image.filename.to_s == filename && category.image_url.present?
+def attach_seed_image!(record, attachment_name, path)
+  raise "Missing seed image: #{path}" unless path.exist?
 
-  File.open(image_path, "rb") do |file|
-    category.image.attach(
+  attachment = record.public_send(attachment_name)
+  filename = path.basename.to_s
+  url = record.public_send("#{attachment_name}_url")
+  return if attachment.attached? && attachment.filename.to_s == filename && url.present?
+
+  attachment.purge if attachment.attached?
+  path.open("rb") do |file|
+    attachment.attach(
       io: file,
       filename: filename,
-      content_type: "image/png"
+      content_type: Marcel::MimeType.for(path)
     )
   end
 end
 
-def seed_category!(menu, name:, drink_type: nil, items:, image: "category.png")
+def seed_category_image!(category, filename)
+  attach_seed_image!(category, :image, Rails.root.join("db/seeds/images/#{filename}"))
+end
+
+def seed_category!(menu, name:, drink_type: nil, items:, image:)
   category = menu.menu_categories.find_or_create_by!(name: name) do |c|
     c.drink_type = drink_type
   end
@@ -52,19 +60,19 @@ our_menu = Menu.find_or_create_by!(name: "Our Menu") do |menu|
 end
 our_menu.update!(category_type: :our_menu)
 
-seed_category!(our_menu, name: "Starters", items: [
+seed_category!(our_menu, name: "Starters", image: "starters.jpg", items: [
   { name: "Tomato Bruschetta", description: "Toasted bread with tomatoes, basil, and olive oil", price: 8.50 },
   { name: "Soup of the Day", description: "Chef's daily soup with fresh bread", price: 7.00 },
   { name: "Caesar Salad", description: "Romaine, parmesan, croutons, Caesar dressing", price: 9.50 }
 ])
 
-seed_category!(our_menu, name: "Mains", items: [
+seed_category!(our_menu, name: "Mains", image: "mains.jpg", items: [
   { name: "Grilled Salmon", description: "Atlantic salmon with seasonal vegetables", price: 22.00 },
   { name: "Ribeye Steak", description: "12oz ribeye with fries and house sauce", price: 28.00 },
   { name: "Mushroom Risotto", description: "Creamy arborio rice with wild mushrooms", price: 18.50 }
 ])
 
-seed_category!(our_menu, name: "Desserts", items: [
+seed_category!(our_menu, name: "Desserts", image: "desserts.jpg", items: [
   { name: "Chocolate Lava Cake", description: "Warm chocolate cake with vanilla ice cream", price: 9.00 },
   { name: "Tiramisu", description: "Classic espresso-soaked ladyfingers and mascarpone", price: 8.50 }
 ])
@@ -81,7 +89,7 @@ specials.menu_categories.where(name: [
   "Friday Special", "Saturday Special", "Sunday Special"
 ]).find_each(&:destroy!)
 
-seed_category!(specials, name: "Chef Specials", items: [
+seed_category!(specials, name: "Chef Specials", image: "chef-specials.jpg", items: [
   { name: "Truffle Pasta", description: "Fresh tagliatelle with black truffle cream", price: 26.00, **day_range(:tuesday) },
   { name: "Taco Tuesday Plate", description: "Three street tacos with salsa and rice", price: 15.00, **day_range(:tuesday) },
   { name: "Duck Confit", description: "Slow-cooked duck leg with cherry reduction", price: 24.50, **day_range(:thursday) },
@@ -92,7 +100,7 @@ seed_category!(specials, name: "Chef Specials", items: [
   { name: "Sunday Roast", description: "Roast chicken, potatoes, gravy", price: 21.00, **day_range(:sunday) }
 ])
 
-seed_category!(specials, name: "Seasonal", items: [
+seed_category!(specials, name: "Seasonal", image: "seasonal.jpg", items: [
   { name: "Pumpkin Ravioli", description: "House-made ravioli with sage butter", price: 19.00, **day_range(:wednesday) },
   { name: "Berry Pavlova", description: "Meringue with seasonal berries and cream", price: 10.00, **day_range(:monday) }
 ])
@@ -103,57 +111,57 @@ drinks = Menu.find_or_create_by!(name: "Drinks") do |menu|
 end
 drinks.update!(category_type: :drinks)
 
-seed_category!(drinks, name: "Draft Beers", drink_type: :beer, items: [
+seed_category!(drinks, name: "Draft Beers", drink_type: :beer, image: "draft-beers.png", items: [
   { name: "House Lager", description: "Crisp draft lager, pint", price: 6.00 },
   { name: "IPA Draft", description: "Hop-forward India Pale Ale, pint", price: 7.50 },
   { name: "Stout Draft", description: "Rich dark stout, pint", price: 7.00 }
 ])
 
-seed_category!(drinks, name: "Bottled Beers", drink_type: :beer, items: [
+seed_category!(drinks, name: "Bottled Beers", drink_type: :beer, image: "bottled-beers.png", items: [
   { name: "Pale Ale Bottle", description: "330ml craft pale ale", price: 5.50 },
   { name: "Wheat Beer Bottle", description: "330ml Belgian-style wheat", price: 6.00 }
 ])
 
-seed_category!(drinks, name: "Red Wines", drink_type: :wine, items: [
+seed_category!(drinks, name: "Red Wines", drink_type: :wine, image: "red-wines.jpg", items: [
   { name: "House Cabernet", description: "Full-bodied red, glass", price: 9.00 },
   { name: "Malbec Reserve", description: "Argentine malbec, glass", price: 11.00 },
   { name: "Pinot Noir", description: "Light elegant red, glass", price: 10.50 }
 ])
 
-seed_category!(drinks, name: "White Wines", drink_type: :wine, items: [
+seed_category!(drinks, name: "White Wines", drink_type: :wine, image: "white-wines.jpg", items: [
   { name: "House Sauvignon Blanc", description: "Crisp white, glass", price: 8.50 },
   { name: "Chardonnay", description: "Oaked chardonnay, glass", price: 10.00 }
 ])
 
-seed_category!(drinks, name: "Classic Cocktails", drink_type: :cocktails, items: [
+seed_category!(drinks, name: "Classic Cocktails", drink_type: :cocktails, image: "classic-cocktails.jpg", items: [
   { name: "Old Fashioned", description: "Whiskey, bitters, sugar, orange", price: 12.00 },
   { name: "Margarita", description: "Tequila, triple sec, lime", price: 11.00 },
   { name: "Martini", description: "Gin or vodka, dry vermouth", price: 13.00 }
 ])
 
-seed_category!(drinks, name: "Signature Cocktails", drink_type: :cocktails, items: [
+seed_category!(drinks, name: "Signature Cocktails", drink_type: :cocktails, image: "signature-cocktails.jpg", items: [
   { name: "Dinehub Smash", description: "House bourbon smash with seasonal fruit", price: 14.00 },
   { name: "Garden Spritz", description: "Aperitivo, prosecco, herb syrup", price: 12.50 }
 ])
 
-seed_category!(drinks, name: "Vodka & Gin", drink_type: :spirits, items: [
+seed_category!(drinks, name: "Vodka & Gin", drink_type: :spirits, image: "vodka-gin.jpg", items: [
   { name: "Premium Vodka", description: "Single pour, neat or rocks", price: 9.00 },
   { name: "London Dry Gin", description: "Single pour with tonic option", price: 9.50 },
   { name: "Flavored Vodka", description: "Citrus or berry infused vodka", price: 10.00 }
 ])
 
-seed_category!(drinks, name: "Rum & Tequila", drink_type: :spirits, items: [
+seed_category!(drinks, name: "Rum & Tequila", drink_type: :spirits, image: "rum-tequila.jpg", items: [
   { name: "Aged Rum", description: "Dark aged rum, single pour", price: 10.00 },
   { name: "Blanco Tequila", description: "100% agave blanco, single pour", price: 9.50 }
 ])
 
-seed_category!(drinks, name: "Scotch", drink_type: :whiskey, items: [
+seed_category!(drinks, name: "Scotch", drink_type: :whiskey, image: "scotch.png", items: [
   { name: "Speyside Single Malt", description: "12-year single malt, neat", price: 14.00 },
   { name: "Islay Peated", description: "Smoky Islay malt, neat", price: 16.00 },
   { name: "Blended Scotch", description: "Smooth house blend", price: 11.00 }
 ])
 
-seed_category!(drinks, name: "Bourbon", drink_type: :whiskey, items: [
+seed_category!(drinks, name: "Bourbon", drink_type: :whiskey, image: "bourbon.png", items: [
   { name: "Kentucky Bourbon", description: "Classic bourbon, neat or rocks", price: 12.00 },
   { name: "Small Batch Bourbon", description: "Small-batch reserve pour", price: 15.00 }
 ])
@@ -167,16 +175,7 @@ def seed_event_item!(event, attrs)
   item.end_time = attrs[:end_time]
   item.save!
 
-  logo_path = Rails.root.join("db/seeds/logos/#{attrs[:logo]}")
-  if logo_path.exist? && (!item.logo.attached? || item.logo.filename.to_s != attrs[:logo] || item.logo_url.blank?)
-    File.open(logo_path, "rb") do |file|
-      item.logo.attach({
-        io: file,
-        filename: attrs[:logo],
-        content_type: "image/png"
-      })
-    end
-  end
+  attach_seed_image!(item, :logo, Rails.root.join("db/seeds/logos/#{attrs[:logo]}"))
 
   item
 end
@@ -190,7 +189,7 @@ seed_event_item!(event, {
   event_date: Date.current + 1,
   start_time: "19:00",
   end_time: "22:00",
-  logo: "live-music.png"
+  logo: "live-music.jpg"
 })
 
 seed_event_item!(event, {
@@ -199,7 +198,7 @@ seed_event_item!(event, {
   event_date: Date.current + 3,
   start_time: "20:00",
   end_time: "23:00",
-  logo: "jazz-night.png"
+  logo: "jazz-night.jpg"
 })
 
 seed_event_item!(event, {
@@ -208,7 +207,7 @@ seed_event_item!(event, {
   event_date: Date.current + 5,
   start_time: "18:30",
   end_time: "21:00",
-  logo: "trivia-night.png"
+  logo: "trivia-night.jpg"
 })
 
 seed_event_item!(sports, {
@@ -217,7 +216,7 @@ seed_event_item!(sports, {
   event_date: Date.current,
   start_time: "17:00",
   end_time: "20:00",
-  logo: "match-day.png"
+  logo: "match-day.jpg"
 })
 
 seed_event_item!(sports, {
@@ -226,7 +225,7 @@ seed_event_item!(sports, {
   event_date: Date.current + 2,
   start_time: "18:00",
   end_time: "21:30",
-  logo: "watch-party.png"
+  logo: "watch-party.jpg"
 })
 
 seed_event_item!(sports, {
@@ -235,7 +234,7 @@ seed_event_item!(sports, {
   event_date: Date.current + 4,
   start_time: "07:30",
   end_time: "09:00",
-  logo: "fitness-morning.png"
+  logo: "fitness-morning.jpg"
 })
 
 # --- Tables ---
