@@ -29,11 +29,9 @@ module Dinehub
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
-    # rswag-ui needs a session stack in API-only apps (development/test gem group).
-    if defined?(Rswag)
-      config.session_store :cookie_store, key: "_dinehub_session"
-      config.middleware.use ActionDispatch::Cookies
-      config.middleware.use config.session_store, config.session_options
-    end
+    # rswag-ui needs a session stack in API-only apps.
+    config.session_store :cookie_store, key: "_dinehub_session"
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use config.session_store, config.session_options
   end
 end
