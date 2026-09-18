@@ -57,7 +57,8 @@ module Api
           start_at: item.start_at,
           end_at: item.end_at,
           menu_category_id: item.menu_category_id,
-          menu_category_name: item.menu_category.name
+          menu_category_name: item.menu_category.name,
+          image_url: item.image_url
         }
       end
     end

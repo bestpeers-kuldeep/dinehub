@@ -1,9 +1,11 @@
 class MenuItem < ApplicationRecord
   belongs_to :menu_category
 
-  
+  has_one_attached :image
 
   delegate :drink_type, to: :menu_category, allow_nil: true
+
+  after_commit :sync_image_url, on: %i[create update]
 
   scope :for_drink_type, ->(drink_type) {
     joins(:menu_category).where(menu_categories: { drink_type: drink_type })
@@ -17,4 +19,13 @@ class MenuItem < ApplicationRecord
       end_date, start_date
     )
   }
+
+  private
+
+  def sync_image_url
+    return unless image.attached?
+
+    url = Rails.application.routes.url_helpers.rails_blob_url(image)
+    update_column(:image_url, url) if image_url != url
+  end
 end

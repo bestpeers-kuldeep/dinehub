@@ -1,6 +1,6 @@
 # Idempotent seed data for menus, categories, and menu items.
 
-def seed_menu_items!(category, items)
+def seed_menu_items!(category, items, default_image: nil)
   items.each do |attrs|
     item = category.menu_items.find_or_initialize_by(name: attrs[:name])
     item.description = attrs[:description]
@@ -8,6 +8,9 @@ def seed_menu_items!(category, items)
     item.start_at = attrs[:start_at]
     item.end_at = attrs[:end_at]
     item.save!
+
+    image = attrs[:image] || default_image
+    seed_item_image!(item, image) if image
   end
 end
 
@@ -30,17 +33,16 @@ def attach_seed_image!(record, attachment_name, path)
   end
 end
 
-def seed_category_image!(category, filename)
-  attach_seed_image!(category, :image, Rails.root.join("db/seeds/images/#{filename}"))
+def seed_item_image!(item, filename)
+  attach_seed_image!(item, :image, Rails.root.join("db/seeds/images/#{filename}"))
 end
 
-def seed_category!(menu, name:, drink_type: nil, items:, image:)
+def seed_category!(menu, name:, drink_type: nil, items:, image: nil)
   category = menu.menu_categories.find_or_create_by!(name: name) do |c|
     c.drink_type = drink_type
   end
   category.update!(drink_type: drink_type) if category.drink_type != drink_type
-  seed_menu_items!(category, items)
-  seed_category_image!(category, image)
+  seed_menu_items!(category, items, default_image: image)
   category
 end
 

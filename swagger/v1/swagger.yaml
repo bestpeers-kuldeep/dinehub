@@ -414,9 +414,6 @@ components:
           nullable: true
           allOf:
             - $ref: "#/components/schemas/DrinkType"
-        image_url:
-          type: string
-          nullable: true
         created_at:
           type: string
           format: date-time
@@ -446,6 +443,9 @@ components:
           nullable: true
         menu_category_id:
           type: integer
+        image_url:
+          type: string
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -497,6 +497,9 @@ components:
                 type: integer
               menu_category_name:
                 type: string
+              image_url:
+                type: string
+                nullable: true
     Event:
       type: object
       properties:
