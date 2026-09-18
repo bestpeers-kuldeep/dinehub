@@ -16,10 +16,11 @@ def attach_seed_image!(record, attachment_name, path)
 
   attachment = record.public_send(attachment_name)
   filename = path.basename.to_s
-  url = record.public_send("#{attachment_name}_url")
-  return if attachment.attached? && attachment.filename.to_s == filename && url.present?
+  url_column = "#{attachment_name}_url"
 
   attachment.purge if attachment.attached?
+  record.update_column(url_column, nil) if record.has_attribute?(url_column)
+
   path.open("rb") do |file|
     attachment.attach(
       io: file,
