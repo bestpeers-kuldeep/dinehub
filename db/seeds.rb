@@ -58,7 +58,10 @@ def day_range(weekday_name)
 end
 
 # --- Our Menu (food) ---
-our_menu = Menu.find_or_create_by!(name: "Our Menu")
+our_menu = Menu.find_or_create_by!(name: "Our Menu") do |menu|
+  menu.category_type = :our_menu
+end
+our_menu.update!(category_type: :our_menu)
 
 seed_category!(our_menu, name: "Starters", image: "starters.jpg", items: [
   { name: "Tomato Bruschetta", description: "Toasted bread with tomatoes, basil, and olive oil", price: 8.50 },
@@ -78,7 +81,10 @@ seed_category!(our_menu, name: "Desserts", image: "desserts.jpg", items: [
 ])
 
 # --- Specials — items timed with start_at / end_at for the current week ---
-specials = Menu.find_or_create_by!(name: "Specials")
+specials = Menu.find_or_create_by!(name: "Specials") do |menu|
+  menu.category_type = :specials
+end
+specials.update!(category_type: :specials)
 
 # Drop old day-named / available_on-based categories if re-seeding
 specials.menu_categories.where(name: [
@@ -103,7 +109,10 @@ seed_category!(specials, name: "Seasonal", image: "seasonal.jpg", items: [
 ])
 
 # --- Drinks ---
-drinks = Menu.find_or_create_by!(name: "Drinks")
+drinks = Menu.find_or_create_by!(name: "Drinks") do |menu|
+  menu.category_type = :drinks
+end
+drinks.update!(category_type: :drinks)
 
 seed_category!(drinks, name: "Draft Beers", drink_type: :beer, image: "draft-beers.png", items: [
   { name: "House Lager", description: "Crisp draft lager, pint", price: 6.00 },

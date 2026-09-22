@@ -1,5 +1,5 @@
 class Menu < ApplicationRecord
   has_many :menu_categories, dependent: :destroy
 
-  validates :name, presence: true, uniqueness: true
+  enum :category_type, { our_menu: 0, specials: 1, drinks: 2 }
 end

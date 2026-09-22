@@ -1,5 +1,7 @@
 one:
   name: Our Menu
+  category_type: 0
 
 two:
   name: Drinks
+  category_type: 2
