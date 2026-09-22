@@ -62,6 +62,12 @@ Rails.application.configure do
   Rails.application.routes.default_url_options = default_url_options
   config.action_mailer.default_url_options = default_url_options
 
+  # Comma-separated frontend origins allowed by CORS (scheme + host, no path).
+  # Override with CORS_ORIGINS, e.g. https://app.example.com,https://www.example.com
+  config.x.cors_origins = ENV.fetch("CORS_ORIGINS") {
+    "#{default_url_options[:protocol]}://#{default_url_options[:host]}"
+  }
+
   # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
   # config.action_mailer.smtp_settings = {
   #   user_name: Rails.application.credentials.dig(:smtp, :user_name),

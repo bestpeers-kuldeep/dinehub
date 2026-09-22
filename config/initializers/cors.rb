@@ -7,17 +7,21 @@
 # Example: CORS_ORIGINS=https://dinehub.example.com,https://www.dinehub.example.com
 # Requests from any other Origin are rejected (no Access-Control-Allow-Origin header).
 #
+# Production uses config.x.cors_origins from config/environments/production.rb
+# (CORS_ORIGINS, or https://#{APP_HOST} when that env var is unset).
+#
 # Read more: https://github.com/cyu/rack-cors
 
-allowed_origins = ENV.fetch("CORS_ORIGINS") {
-  if Rails.env.production?
-    ""
-  else
+cors_origins = if Rails.env.production?
+  Rails.application.config.x.cors_origins
+else
+  ENV.fetch("CORS_ORIGINS") {
     "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://localhost:3001,https://#{ENV.fetch("APP_HOST")}"
-  end
-  
-}.split(",").map(&:strip).compact_blank.freeze 
- 
+  }
+end
+
+allowed_origins = cors_origins.to_s.split(",").map(&:strip).compact_blank.freeze
+
 Rails.application.config.allowed_cors_origins = allowed_origins
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
