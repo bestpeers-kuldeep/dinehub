@@ -27,7 +27,7 @@ module Api
         permitted = %i[
           full_name first_name last_name phone email company
           reservation_date start_time duration budget_per_person number_of_people
-          occasion description source marketing_opt_in
+          occasion description special_requests source marketing_opt_in
         ]
         nested = params[param_key].presence || params[:reservation]
         if nested.present?

@@ -16,6 +16,7 @@ class Api::V1::InquiryReservationsControllerTest < ActionDispatch::IntegrationTe
       number_of_people: 20,
       occasion: "Birthday",
       description: "Birthday dinner for 20",
+      special_requests: "Wheelchair access near the bar",
       source: "website"
     }
   end
@@ -34,6 +35,7 @@ class Api::V1::InquiryReservationsControllerTest < ActionDispatch::IntegrationTe
     assert_equal "2 hours", body["duration"]
     assert_equal "Birthday", body["occasion"]
     assert_equal 20, body["number_of_people"]
+    assert_equal "Wheelchair access near the bar", body["special_requests"]
     assert_equal false, body["marketing_opt_in"]
     refute body.key?("table_id")
   end
@@ -69,6 +71,7 @@ class Api::V1::InquiryReservationsControllerTest < ActionDispatch::IntegrationTe
     body = JSON.parse(response.body)
     assert_equal "CateringReservation", body["type"]
     assert_equal "Northwind", body["company"]
+    assert_equal "Wheelchair access near the bar", body["special_requests"]
   end
 
   test "does not reduce dining table availability" do

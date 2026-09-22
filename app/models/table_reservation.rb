@@ -43,6 +43,7 @@ class TableReservation < Reservation
       reservation_date: reservation_date,
       start_time: parsed_start_time.strftime("%H:%M"),
       estimated_end_time: estimated_end_time.strftime("%H:%M"),
+      number_of_people: number_of_people,
       full_name: full_name,
       email: email,
       phone: phone,

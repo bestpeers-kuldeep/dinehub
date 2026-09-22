@@ -7,6 +7,7 @@ class Api::V1::ReservationsControllerTest < ActionDispatch::IntegrationTest
       location: "Cocktail Bar",
       reservation_date: "2026-09-16",
       start_time: "18:00",
+      number_of_people: 2,
       first_name: "Alex",
       last_name: "Guest",
       email: "alex@example.com",
@@ -27,12 +28,15 @@ class Api::V1::ReservationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "TableReservation", body["type"]
     assert_equal "18:00", body["start_time"]
     assert_equal "20:00", body["estimated_end_time"]
+    assert_equal 2, body["number_of_people"]
     assert_equal "Alex Guest", body["full_name"]
     refute body.key?("first_name")
     refute body.key?("last_name")
     assert_nil body["table_id"]
     refute_includes response.body, tables(:table_one).name
-    assert_equal "Alex Guest", TableReservation.last.full_name
+    reservation = TableReservation.last
+    assert_equal "Alex Guest", reservation.full_name
+    assert_equal 2, reservation.number_of_people
   end
 
   test "creates a reservation from a json body" do
@@ -82,5 +86,14 @@ class Api::V1::ReservationsControllerTest < ActionDispatch::IntegrationTest
 
     post "/api/v1/reservations", params: @params.merge(first_name: "Late", last_name: "Guest", email: "late@example.com")
     assert_response :unprocessable_entity
+  end
+
+  test "assigns a table that seats number_of_people" do
+    post "/api/v1/reservations", params: @params.merge(number_of_people: 4)
+
+    assert_response :created
+    body = JSON.parse(response.body)
+    assert_equal 4, body["number_of_people"]
+    assert_equal tables(:table_two).id, TableReservation.last.table_id
   end
 end

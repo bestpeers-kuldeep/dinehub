@@ -47,12 +47,12 @@ module Api
       end
 
       def party_size
-        params[:capacity].presence || params.dig(:reservation, :capacity)
+        params[:number_of_people].presence || params.dig(:reservation, :number_of_people)
       end
 
       def reservation_params
         permitted = %i[
-          location reservation_date start_time capacity
+          location reservation_date start_time number_of_people
           full_name first_name last_name email phone occasion special_requests marketing_opt_in
         ]
         if params[:reservation].present?
@@ -63,7 +63,7 @@ module Api
       end
 
       def guest_params
-        reservation_params.except(:location, :capacity, :first_name, :last_name).merge(
+        reservation_params.except(:location, :first_name, :last_name).merge(
           full_name: Reservations::FullName.from(reservation_params)
         )
       end

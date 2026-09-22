@@ -14,6 +14,7 @@ class InquiryReservationMailerTest < ActionMailer::TestCase
       number_of_people: 20,
       occasion: "Birthday",
       description: "Birthday dinner for 20",
+      special_requests: "Wheelchair access near the bar",
       source: "website"
     }
   end
@@ -31,6 +32,7 @@ class InquiryReservationMailerTest < ActionMailer::TestCase
     assert_includes email.html_part.body.to_s, "We've recorded your party inquiry"
     assert_includes email.text_part.body.to_s, "Our team will contact you soon"
     assert_includes email.text_part.body.to_s, "Birthday"
+    assert_includes email.text_part.body.to_s, "Wheelchair access near the bar"
   end
 
   test "catering inquiry received" do

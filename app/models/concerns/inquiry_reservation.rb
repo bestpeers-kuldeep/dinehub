@@ -33,6 +33,7 @@ module InquiryReservation
       number_of_people: number_of_people,
       occasion: occasion,
       description: description,
+      special_requests: special_requests,
       source: source,
       marketing_opt_in: marketing_opt_in
     }

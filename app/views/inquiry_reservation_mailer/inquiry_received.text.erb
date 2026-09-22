@@ -23,6 +23,11 @@ Reference: #<%= @reservation.id %>
 NOTES
 <%= @reservation.description %>
 <% end %>
+<% if @reservation.special_requests.present? %>
+
+SPECIAL REQUESTS
+<%= @reservation.special_requests %>
+<% end %>
 
 This is not a confirmed booking yet. Our team will contact you at <%= @reservation.email %> or <%= @reservation.phone %> to finalize the details.
 

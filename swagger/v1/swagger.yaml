@@ -248,7 +248,7 @@ paths:
               location: Cocktail Bar
               reservation_date: "2026-09-16"
               start_time: "18:00"
-              capacity: 2
+              number_of_people: 2
               first_name: Alex
               last_name: Guest
               email: alex@example.com
@@ -307,6 +307,7 @@ paths:
               number_of_people: 20
               occasion: Birthday
               description: Birthday dinner for 20
+              special_requests: Wheelchair access near the bar
               source: website
               marketing_opt_in: false
       responses:
@@ -344,6 +345,7 @@ paths:
               number_of_people: 20
               occasion: Birthday
               description: Off-site catering for 20
+              special_requests: Vegetarian options required
               source: website
       responses:
         "201":
@@ -581,7 +583,7 @@ components:
         start_time:
           type: string
           example: "18:00"
-        capacity:
+        number_of_people:
           type: integer
         first_name:
           type: string
@@ -618,6 +620,9 @@ components:
           type: string
         estimated_end_time:
           type: string
+        number_of_people:
+          type: integer
+          nullable: true
         full_name:
           type: string
         email:
@@ -664,6 +669,8 @@ components:
           type: string
         description:
           type: string
+        special_requests:
+          type: string
         source:
           type: string
         marketing_opt_in:
@@ -699,6 +706,9 @@ components:
         occasion:
           type: string
         description:
+          type: string
+          nullable: true
+        special_requests:
           type: string
           nullable: true
         source:

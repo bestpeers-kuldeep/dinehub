@@ -90,6 +90,21 @@
           </tr>
         <% end %>
 
+        <% if @reservation.special_requests.present? %>
+          <tr>
+            <td style="padding:16px 32px 0;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-left:3px solid #c9a86a;background-color:#fdfbf7;border-radius:4px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#9a938a;">Special requests</div>
+                    <div style="padding-top:8px;font-size:15px;line-height:23px;color:#1f2a24;"><%= @reservation.special_requests %></div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        <% end %>
+
         <tr>
           <td style="padding:24px 32px 32px;">
             <p style="margin:0;font-size:14px;line-height:23px;color:#6b7370;">

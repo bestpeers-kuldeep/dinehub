@@ -42,6 +42,7 @@ class InquiryReservationMailerPreview < ActionMailer::Preview
       number_of_people: 24,
       occasion: "Birthday",
       description: "Birthday dinner for 24 with a private toast at 8pm.",
+      special_requests: "Wheelchair access near the bar",
       source: "website"
     )
   end
@@ -60,6 +61,7 @@ class InquiryReservationMailerPreview < ActionMailer::Preview
       number_of_people: 80,
       occasion: "Corporate lunch",
       description: "Buffet lunch for an offsite, vegetarian options required.",
+      special_requests: "Vegetarian options required",
       source: "website"
     )
   end
