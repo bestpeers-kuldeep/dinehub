@@ -17,6 +17,7 @@ tags:
   - name: Events
   - name: Tables
   - name: Reservations
+  - name: Careers
 paths:
   /api/v1/menus:
     get:
@@ -354,6 +355,49 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/InquiryReservation"
+        "422":
+          $ref: "#/components/responses/Unprocessable"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /api/v1/careers:
+    post:
+      tags: [Careers]
+      summary: Submit a job application
+      description: |
+        Body may be a flat JSON object or nested under `career`. Send
+        `multipart/form-data` to attach a resume file; `resume_link` is filled
+        from the uploaded file when present.
+      operationId: createCareer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CareerRequest"
+            example:
+              full_name: Alex Guest
+              email: alex@example.com
+              phone: "555-0100"
+              opt_in: false
+              experience: 5 years front of house
+              cover_letter: I would love to join the team.
+              resume_link: https://example.com/resume.pdf
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: "#/components/schemas/CareerRequest"
+                - type: object
+                  properties:
+                    resume:
+                      type: string
+                      format: binary
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Career"
         "422":
           $ref: "#/components/responses/Unprocessable"
         "500":
@@ -715,6 +759,46 @@ components:
           type: string
         marketing_opt_in:
           type: boolean
+    CareerRequest:
+      type: object
+      required: [full_name, email, phone, experience]
+      properties:
+        full_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        opt_in:
+          type: boolean
+        experience:
+          type: string
+        cover_letter:
+          type: string
+        resume_link:
+          type: string
+    Career:
+      type: object
+      properties:
+        id:
+          type: integer
+        full_name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        opt_in:
+          type: boolean
+        experience:
+          type: string
+        cover_letter:
+          type: string
+          nullable: true
+        resume_link:
+          type: string
+          nullable: true
   responses:
     NotFound:
       description: Record not found
