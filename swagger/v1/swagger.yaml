@@ -18,7 +18,80 @@ tags:
   - name: Tables
   - name: Reservations
   - name: Careers
+  - name: Auth
 paths:
+  /api/v1/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a user
+      description: |
+        Creates a user and returns a JWT. Body may be a flat JSON object or nested under `user`.
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+            example:
+              first_name: Sam
+              last_name: Diner
+              email: sam@example.com
+              phone: "555-0200"
+              password: password123
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "422":
+          $ref: "#/components/responses/Unprocessable"
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in
+      description: |
+        Authenticates with email and password and returns a JWT. Body may be a
+        flat JSON object or nested under `user`.
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            example:
+              email: sam@example.com
+              password: password123
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /api/v1/auth/me:
+    get:
+      tags: [Auth]
+      summary: Current user
+      description: "Returns the authenticated user. Send `Authorization: Bearer <token>`."
+      operationId: currentUser
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /api/v1/menus:
   /api/v1/menus:
     get:
       tags: [Menus]
@@ -403,6 +476,11 @@ paths:
         "500":
           $ref: "#/components/responses/ServerError"
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   parameters:
     Id:
       name: id
@@ -799,6 +877,52 @@ components:
         resume_link:
           type: string
           nullable: true
+    RegisterRequest:
+      type: object
+      required: [first_name, last_name, email, phone, password]
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        password:
+          type: string
+          format: password
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
   responses:
     NotFound:
       description: Record not found
@@ -810,6 +934,12 @@ components:
             $ref: "#/components/schemas/Errors"
     ServerError:
       description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Missing or invalid credentials
       content:
         application/json:
           schema:

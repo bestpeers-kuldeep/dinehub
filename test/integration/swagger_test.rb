@@ -14,5 +14,6 @@ class SwaggerTest < ActionDispatch::IntegrationTest
     assert_match %r{/api/v1/menus}, response.body
     assert_match %r{/api/v1/reservations}, response.body
     assert_match %r{/api/v1/careers}, response.body
+    assert_match %r{/api/v1/auth/register}, response.body
   end
 end

@@ -20,6 +20,10 @@ Rails.application.routes.draw do
       resources :catering_reservations, only: %i[create]
       resources :careers, only: %i[create]
       get "specials", to: "specials#index"
+
+      post "auth/register", to: "auth#register"
+      post "auth/login", to: "auth#login"
+      get "auth/me", to: "auth#me"
     end
   end
 
