@@ -26,6 +26,10 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: jwt
   parameters:
     Id:
       name: id
@@ -548,6 +552,14 @@ paths:
           application/json:
             schema:
               "$ref": "#/components/schemas/LoginRequest"
+  "/api/v1/auth/logout":
+    delete:
+      summary: Log out
+      tags:
+      - Auth
+      responses:
+        '204':
+          description: logged out
   "/api/v1/auth/me":
     get:
       summary: Get the current user
@@ -555,6 +567,7 @@ paths:
       - Auth
       security:
       - BearerAuth: []
+      - CookieAuth: []
       parameters:
       - name: Authorization
         in: header

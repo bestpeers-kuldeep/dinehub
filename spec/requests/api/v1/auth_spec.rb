@@ -60,8 +60,9 @@ RSpec.describe "Auth API", type: :request do
         run_test! do |response|
           payload = JSON.parse(response.body)
 
-          expect(payload["token"]).to be_present
+          expect(payload["token"]).to be_nil
           expect(payload.dig("user", "id")).to eq(user.id)
+          expect(response.cookies["jwt"]).to be_present
         end
       end
 
@@ -76,11 +77,29 @@ RSpec.describe "Auth API", type: :request do
     end
   end
 
+  path "/api/v1/auth/logout" do
+    delete "Log out" do
+      tags "Auth"
+
+      response "204", "logged out" do
+        let!(:user) { create(:user) }
+
+        before do
+          cookies[:jwt] = JsonWebToken.encode({ user_id: user.id })
+        end
+
+        run_test! do
+          expect(response.cookies["jwt"]).to be_blank
+        end
+      end
+    end
+  end
+
   path "/api/v1/auth/me" do
     get "Get the current user" do
       tags "Auth"
       produces "application/json"
-      security [BearerAuth: []]
+      security [{ BearerAuth: [] }, { CookieAuth: [] }]
       parameter name: :Authorization, in: :header, type: :string, required: false
 
       response "200", "current user" do
@@ -113,5 +132,15 @@ RSpec.describe "Auth API", type: :request do
     get "/api/v1/auth/me", headers: { "Authorization" => "Bearer not-a-token" }
 
     expect(response).to have_http_status(:unauthorized)
+  end
+
+  it "authenticates the current user from the jwt cookie" do
+    user = create(:user)
+    cookies[:jwt] = JsonWebToken.encode({ user_id: user.id })
+
+    get "/api/v1/auth/me"
+
+    expect(response).to have_http_status(:ok)
+    expect(json_body["email"]).to eq(user.email)
   end
 end

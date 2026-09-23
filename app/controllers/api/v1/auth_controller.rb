@@ -13,10 +13,16 @@ module Api
       def login
         user = User.find_by(email: login_params[:email].to_s.strip.downcase)
         if user&.authenticate(login_params[:password])
-          render json: auth_payload(user)
+          set_auth_cookie(JsonWebToken.encode({ user_id: user.id }))
+          render json: { user: user.as_public_json }
         else
           render json: { error: "Invalid email or password" }, status: :unauthorized
         end
+      end
+
+      def logout
+        clear_auth_cookie
+        head :no_content
       end
 
       def me

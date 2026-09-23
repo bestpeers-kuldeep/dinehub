@@ -9,6 +9,7 @@ RSpec.describe "CORS", type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(response.headers["Access-Control-Allow-Origin"]).to eq(allowed_origin)
+    expect(response.headers["Access-Control-Allow-Credentials"]).to eq("true")
   end
 
   it "does not allow requests from an unconfigured origin" do
