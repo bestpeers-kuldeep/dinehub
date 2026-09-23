@@ -45,6 +45,28 @@ module Api
         end
       end
 
+      def reset_password
+        token = reset_password_params[:token].to_s
+        password = reset_password_params[:password]
+        password_confirmation = reset_password_params[:password_confirmation]
+
+        if token.blank? || password.blank?
+          render json: { errors: [ "Token and password are required" ] }, status: :unprocessable_entity
+          return
+        end
+
+        user = User.find_by_reset_password_token(token)
+        unless user&.reset_password_period_valid?
+          render json: { error: "Reset token is invalid or expired" }, status: :unprocessable_entity
+          return
+        end
+
+        user.reset_password!(password: password, password_confirmation: password_confirmation)
+        render json: { message: "Password has been reset" }
+      rescue ActiveRecord::RecordInvalid => e
+        render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+      end
+
       private
 
       def user_params
@@ -70,6 +92,15 @@ module Api
           params.require(:user).permit(:email)
         else
           params.permit(:email)
+        end
+      end
+
+      def reset_password_params
+        permitted = %i[token password password_confirmation]
+        if params[:user].present?
+          params.require(:user).permit(permitted)
+        else
+          params.permit(permitted)
         end
       end
 

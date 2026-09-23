@@ -486,6 +486,20 @@ components:
         email:
           type: string
           format: email
+    ResetPasswordRequest:
+      type: object
+      required:
+      - token
+      - password
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+          format: password
+        password_confirmation:
+          type: string
+          format: password
     User:
       type: object
       properties:
@@ -605,6 +619,22 @@ paths:
           application/json:
             schema:
               "$ref": "#/components/schemas/ForgotPasswordRequest"
+  "/api/v1/auth/reset_password":
+    post:
+      summary: Reset password with a token
+      tags:
+      - Auth
+      parameters: []
+      responses:
+        '200':
+          description: password updated
+        '422':
+          description: token is invalid or expired
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ResetPasswordRequest"
   "/api/v1/careers":
     post:
       summary: Submit a job application

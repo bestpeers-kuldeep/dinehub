@@ -39,4 +39,18 @@ RSpec.describe User, type: :model do
       expect(user.reset_password_sent_at).to be_present
     }.to have_enqueued_mail(UserMailer, :reset_password_instructions)
   end
+
+  it "updates the password digest from a valid reset token" do
+    user = create(:user, password: "password123")
+    raw_token = user.send_reset_password_instructions
+
+    user.reset_password!(password: "newpass123")
+    user.reload
+
+    expect(user.authenticate("newpass123")).to be_truthy
+    expect(user.authenticate("password123")).to be_falsey
+    expect(user.reset_password_token).to be_nil
+    expect(user.reset_password_sent_at).to be_nil
+    expect(User.find_by_reset_password_token(raw_token)).to be_nil
+  end
 end

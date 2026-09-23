@@ -158,6 +158,37 @@ RSpec.describe "Auth API", type: :request do
     end
   end
 
+  path "/api/v1/auth/reset_password" do
+    post "Reset password with a token" do
+      tags "Auth"
+      consumes "application/json"
+      produces "application/json"
+      parameter name: :payload, in: :body, schema: { "$ref" => "#/components/schemas/ResetPasswordRequest" }
+
+      response "200", "password updated" do
+        let!(:user) { create(:user, password: "password123") }
+        let(:raw_token) { user.send_reset_password_instructions }
+        let(:payload) { { token: raw_token, password: "newpass123", password_confirmation: "newpass123" } }
+
+        run_test! do |response|
+          expect(JSON.parse(response.body)["message"]).to eq("Password has been reset")
+          user.reload
+          expect(user.authenticate("newpass123")).to be_truthy
+          expect(user.reset_password_token).to be_nil
+          expect(user.reset_password_sent_at).to be_nil
+        end
+      end
+
+      response "422", "token is invalid or expired" do
+        let(:payload) { { token: "not-a-real-token", password: "newpass123" } }
+
+        run_test! do |response|
+          expect(JSON.parse(response.body)["error"]).to eq("Reset token is invalid or expired")
+        end
+      end
+    end
+  end
+
   it "registers a user nested under user" do
     post "/api/v1/auth/register", params: { user: registration_attributes }, as: :json
 
@@ -189,5 +220,18 @@ RSpec.describe "Auth API", type: :request do
     }.to have_enqueued_mail(UserMailer, :reset_password_instructions)
 
     expect(response).to have_http_status(:ok)
+  end
+
+  it "rejects a password confirmation mismatch" do
+    user = create(:user)
+    raw_token = user.send_reset_password_instructions
+
+    post "/api/v1/auth/reset_password",
+      params: { token: raw_token, password: "newpass123", password_confirmation: "otherpass" },
+      as: :json
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(json_body.fetch("errors")).to include("Password confirmation doesn't match Password")
+    expect(user.reload.authenticate("password123")).to be_truthy
   end
 end

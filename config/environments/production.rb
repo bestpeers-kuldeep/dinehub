@@ -49,10 +49,6 @@ Rails.application.configure do
   # Replace the default in-process and non-durable queuing backend for Active Job.
   # config.active_job.queue_adapter = :resque
 
-  # Ignore bad email addresses and do not raise email delivery errors.
-  # Set this to true and configure the email server for immediate delivery to raise delivery errors.
-  # config.action_mailer.raise_delivery_errors = false
-
   # Host used by links generated outside of a request (mailers, Active Storage URLs, seeds).
   default_url_options = {
     host: ENV.fetch("APP_HOST"),
@@ -68,14 +64,22 @@ Rails.application.configure do
     "#{default_url_options[:protocol]}://#{default_url_options[:host]}"
   }
 
-  # Specify outgoing SMTP server. Remember to add smtp/* credentials via bin/rails credentials:edit.
-  # config.action_mailer.smtp_settings = {
-  #   user_name: Rails.application.credentials.dig(:smtp, :user_name),
-  #   password: Rails.application.credentials.dig(:smtp, :password),
-  #   address: "smtp.example.com",
-  #   port: 587,
-  #   authentication: :plain
-  # }
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.perform_caching = false
+
+  config.action_mailer.smtp_settings = {
+    address: ENV.fetch("SMTP_ADDRESS", "smtp.gmail.com"),
+    port: Integer(ENV.fetch("SMTP_PORT", "587")),
+    domain: ENV.fetch("SMTP_DOMAIN", default_url_options[:host]),
+    user_name: ENV.fetch("SMTP_USERNAME"),
+    password: ENV.fetch("SMTP_PASSWORD"),
+    authentication: ENV.fetch("SMTP_AUTHENTICATION", "plain").to_sym,
+    enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS_AUTO", "true") == "true",
+    open_timeout: 10,
+    read_timeout: 10
+  }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
