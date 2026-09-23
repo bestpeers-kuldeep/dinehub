@@ -121,6 +121,43 @@ RSpec.describe "Auth API", type: :request do
     end
   end
 
+  path "/api/v1/auth/forgot_password" do
+    post "Request a password reset" do
+      tags "Auth"
+      consumes "application/json"
+      produces "application/json"
+      parameter name: :payload, in: :body, schema: { "$ref" => "#/components/schemas/ForgotPasswordRequest" }
+
+      response "200", "reset instructions sent" do
+        let!(:user) { create(:user) }
+        let(:payload) { { email: user.email } }
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(body["message"]).to eq("Password reset instructions sent to email")
+          expect(user.reload.reset_password_token).to be_present
+          expect(user.reset_password_sent_at).to be_present
+        end
+      end
+
+      response "404", "email not found" do
+        let(:payload) { { email: "missing@example.com" } }
+
+        run_test! do |response|
+          expect(JSON.parse(response.body)["error"]).to eq("Email not found")
+        end
+      end
+
+      response "422", "email is missing" do
+        let(:payload) { { email: "" } }
+
+        run_test! do |response|
+          expect(JSON.parse(response.body).fetch("errors")).to include("Email can't be blank")
+        end
+      end
+    end
+  end
+
   it "registers a user nested under user" do
     post "/api/v1/auth/register", params: { user: registration_attributes }, as: :json
 
@@ -142,5 +179,15 @@ RSpec.describe "Auth API", type: :request do
 
     expect(response).to have_http_status(:ok)
     expect(json_body["email"]).to eq(user.email)
+  end
+
+  it "accepts a nested forgot-password payload and enqueues the email" do
+    user = create(:user)
+
+    expect {
+      post "/api/v1/auth/forgot_password", params: { user: { email: user.email } }, as: :json
+    }.to have_enqueued_mail(UserMailer, :reset_password_instructions)
+
+    expect(response).to have_http_status(:ok)
   end
 end

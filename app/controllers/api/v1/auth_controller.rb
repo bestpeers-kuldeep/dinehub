@@ -29,6 +29,22 @@ module Api
         render json: current_user.as_public_json
       end
 
+      def forgot_password
+        email = forgot_password_params[:email].to_s.strip.downcase
+        if email.blank?
+          render json: { errors: [ "Email can't be blank" ] }, status: :unprocessable_entity
+          return
+        end
+
+        user = User.find_by(email: email)
+        if user
+          user.send_reset_password_instructions
+          render json: { message: "Password reset instructions sent to email" }
+        else
+          render json: { error: "Email not found" }, status: :not_found
+        end
+      end
+
       private
 
       def user_params
@@ -46,6 +62,14 @@ module Api
           params.require(:user).permit(permitted)
         else
           params.permit(permitted)
+        end
+      end
+
+      def forgot_password_params
+        if params[:user].present?
+          params.require(:user).permit(:email)
+        else
+          params.permit(:email)
         end
       end
 

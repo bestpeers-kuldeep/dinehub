@@ -18,4 +18,20 @@ class User < ApplicationRecord
       phone: phone
     }
   end
+
+  def send_reset_password_instructions
+    raw_token = SecureRandom.urlsafe_base64(24)
+    update!(
+      reset_password_token: Digest::SHA256.hexdigest(raw_token),
+      reset_password_sent_at: Time.current
+    )
+    UserMailer.reset_password_instructions(self, raw_token).deliver_later
+    raw_token
+  end
+
+  def reset_password_url(raw_token)
+    host = ENV.fetch("FRONTEND_HOST", ENV.fetch("APP_HOST", "localhost:5173"))
+    protocol = ENV.fetch("APP_PROTOCOL", Rails.env.production? ? "https" : "http")
+    "#{protocol}://#{host}/reset-password?token=#{raw_token}"
+  end
 end

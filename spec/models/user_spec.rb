@@ -28,4 +28,15 @@ RSpec.describe User, type: :model do
     expect(user.authenticate("password123")).to be_truthy
     expect(user.authenticate("wrong-password")).to be_falsey
   end
+
+  it "stores a hashed reset token and enqueues a reset email" do
+    user = create(:user)
+
+    expect {
+      raw_token = user.send_reset_password_instructions
+      expect(raw_token).to be_present
+      expect(user.reload.reset_password_token).to eq(Digest::SHA256.hexdigest(raw_token))
+      expect(user.reset_password_sent_at).to be_present
+    }.to have_enqueued_mail(UserMailer, :reset_password_instructions)
+  end
 end
