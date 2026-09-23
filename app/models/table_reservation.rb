@@ -24,7 +24,7 @@ class TableReservation < Reservation
   scope :overlapping, ->(date, start_time, end_time = nil) {
     start_at = coerce_time(start_time)
     end_at = end_time.present? ? coerce_time(end_time) : start_at + ESTIMATED_DURATION
-    window_start = start_at - SLOT_MINUTES.minutes
+    window_start = start_at - ESTIMATED_DURATION
 
     where(reservation_date: date)
       .where("start_time < ?", sql_time(end_at))

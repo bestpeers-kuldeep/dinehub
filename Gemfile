@@ -41,8 +41,8 @@ gem "image_processing", "~> 1.2"
 gem "rack-cors"
 
 # Use Swagger for API documentation
-gem 'rswag-api'
-gem 'rswag-ui'
+gem "rswag-api"
+gem "rswag-ui"
 
 group :development, :test do
   # Load .env into ENV for local development/test
@@ -55,6 +55,10 @@ group :development, :test do
   gem "bundler-audit", require: false
 
   gem "letter_opener_web"
+
+  gem "factory_bot_rails"
+  gem "rspec-rails"
+  gem "rswag-specs"
 
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false

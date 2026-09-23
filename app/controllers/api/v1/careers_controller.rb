@@ -16,7 +16,7 @@ module Api
       private
 
       def career_params
-        permitted = %i[full_name email phone opt_in experience cover_letter resume]
+        permitted = %i[full_name email phone opt_in experience cover_letter resume_link resume]
         if params[:career].present?
           params.require(:career).permit(permitted)
         else

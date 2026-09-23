@@ -1,8 +1,0 @@
-one:
-  name: Starters
-  menu: one
-
-two:
-  name: Draft Beers
-  menu: two
-  drink_type: 0

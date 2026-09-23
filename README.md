@@ -92,10 +92,13 @@ Request bodies may be flat JSON or nested (`reservation`, `parties_reservation`,
 
 ```sh
 bin/rails db:test:prepare
-bin/rails test
+bundle exec rspec spec
+RAILS_ENV=test bundle exec rake rswag:specs:swaggerize
 ```
 
-CI (`.github/workflows/ci.yml`) runs Brakeman, bundler-audit, RuboCop, and the test suite against PostgreSQL.
+RSpec request specs generate `swagger/v1/swagger.yaml` through rswag. CI
+(`.github/workflows/ci.yml`) runs Brakeman, bundler-audit, RuboCop, RSpec, and
+OpenAPI generation against PostgreSQL.
 
 ```sh
 bin/rubocop
