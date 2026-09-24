@@ -1,4 +1,6 @@
 class MenuItem < ApplicationRecord
+  include AttachmentUrl
+
   belongs_to :menu_category
 
   has_one_attached :image
@@ -25,7 +27,7 @@ class MenuItem < ApplicationRecord
   def sync_image_url
     return unless image.attached?
 
-    url = Rails.application.routes.url_helpers.rails_blob_url(image)
+    url = synced_attachment_url(image)
     update_column(:image_url, url) if image_url != url
   end
 end
