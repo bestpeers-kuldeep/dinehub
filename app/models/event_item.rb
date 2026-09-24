@@ -1,4 +1,6 @@
 class EventItem < ApplicationRecord
+  include AttachmentUrl
+
   belongs_to :event
 
   has_one_attached :logo
@@ -13,7 +15,7 @@ class EventItem < ApplicationRecord
   def sync_logo_url
     return unless logo.attached?
 
-    url = Rails.application.routes.url_helpers.rails_blob_url(logo)
+    url = synced_attachment_url(logo)
     update_column(:logo_url, url) if logo_url != url
   end
 end

@@ -1,4 +1,6 @@
 class Career < ApplicationRecord
+  include AttachmentUrl
+
   has_one_attached :resume
 
   validates :full_name, :email, :phone, :experience, presence: true
@@ -24,7 +26,7 @@ class Career < ApplicationRecord
   def sync_resume_link
     return unless resume.attached?
 
-    url = Rails.application.routes.url_helpers.rails_blob_url(resume)
+    url = synced_attachment_url(resume)
     update_column(:resume_link, url) if resume_link != url
   end
 end
