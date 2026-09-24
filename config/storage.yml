@@ -6,13 +6,16 @@ local:
   service: Disk
   root: <%= Rails.root.join("storage") %>
 
-# Use bin/rails credentials:edit to set the AWS secrets (as aws:access_key_id|secret_access_key)
-# amazon:
-#   service: S3
-#   access_key_id: <%= Rails.application.credentials.dig(:aws, :access_key_id) %>
-#   secret_access_key: <%= Rails.application.credentials.dig(:aws, :secret_access_key) %>
-#   region: us-east-1
-#   bucket: your_own_bucket-<%= Rails.env %>
+# Production Active Storage only. Credentials come from CLOUDINARY_URL
+# (cloudinary://API_KEY:API_SECRET@CLOUD_NAME) or CLOUDINARY_CLOUD_NAME /
+# CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET. The Cloudinary service infers
+# resource type from content type (images, PDFs, and other files).
+cloudinary:
+  service: Cloudinary
+  api_key: <%= ENV.fetch("CLOUDINARY_API_KEY") %>
+  api_secret: <%= ENV.fetch("API_SECRET") %>
+  cloud_name: <%= ENV.fetch("CLOUDINARY_CLOUD_NAME") %>
+  folder: <%= ENV.fetch("CLOUDINARY_FOLDER", "dinehub") %>
 
 # Remember not to checkin your GCS keyfile to a repository
 # google:
