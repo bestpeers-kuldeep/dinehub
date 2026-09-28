@@ -2,7 +2,8 @@ class MenuItem < ApplicationRecord
   include AttachmentUrl
 
   belongs_to :menu_category
-
+  has_many :cart_items, dependent: :destroy
+  has_many :order_items, dependent: :restrict_with_error
   has_one_attached :image
 
   delegate :drink_type, to: :menu_category, allow_nil: true

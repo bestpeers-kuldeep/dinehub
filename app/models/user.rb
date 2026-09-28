@@ -10,6 +10,9 @@ class User < ApplicationRecord
   validates :phone, uniqueness: true
   validates :password, length: { minimum: 8 }, allow_nil: true
 
+  has_many :carts, dependent: :destroy
+  # has_many :orders, dependent: :destroy
+
   def as_public_json
     {
       id: id,
