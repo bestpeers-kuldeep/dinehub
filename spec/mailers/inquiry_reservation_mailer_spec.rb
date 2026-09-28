@@ -13,7 +13,7 @@ RSpec.describe InquiryReservationMailer, type: :mailer do
 
     expect { email.deliver_now }
       .to change(ActionMailer::Base.deliveries, :count).by(1)
-    expect(email.to).to eq([reservation.email])
+    expect(email.to).to eq([ reservation.email ])
     expect(email.subject).to eq("We received your party inquiry")
     expect(email.html_part.body.to_s).to include("We've recorded your Party Request")
     expect(email.text_part.body.to_s).to include("Our team will contact you soon")
@@ -27,7 +27,7 @@ RSpec.describe InquiryReservationMailer, type: :mailer do
 
     expect { email.deliver_now }
       .to change(ActionMailer::Base.deliveries, :count).by(1)
-    expect(email.to).to eq([reservation.email])
+    expect(email.to).to eq([ reservation.email ])
     expect(email.subject).to eq("We received your catering inquiry")
     expect(email.html_part.body.to_s).to include("We've recorded your Catering Request")
     expect(email.text_part.body.to_s).to include("Northwind")
