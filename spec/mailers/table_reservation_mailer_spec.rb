@@ -13,7 +13,7 @@ RSpec.describe TableReservationMailer, type: :mailer do
 
     expect { email.deliver_now }
       .to change(ActionMailer::Base.deliveries, :count).by(1)
-    expect(email.to).to eq([reservation.email])
+    expect(email.to).to eq([ reservation.email ])
     expect(email.subject).to eq("Reservation Confirmation")
     expect(email.html_part.body.to_s).to include(reservation.full_name)
     expect(email.text_part.body.to_s).to include("Cocktail Bar")

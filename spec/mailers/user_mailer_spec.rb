@@ -13,8 +13,8 @@ RSpec.describe UserMailer, type: :mailer do
     expect(email.to).to eq([ "alex@example.com" ])
     expect(email.subject).to eq("Reset your DineHub password")
     expect(email.html_part.body.to_s).to include("Reset your password")
-    expect(email.html_part.body.to_s).to include("reset-password?token=#{raw_token}")
+    expect(email.html_part.body.to_s).to include("reset_password?token=#{raw_token}")
     expect(email.text_part.body.to_s).to include("Hi Alex")
-    expect(email.text_part.body.to_s).to include("reset-password?token=#{raw_token}")
+    expect(email.text_part.body.to_s).to include("reset_password?token=#{raw_token}")
   end
 end

@@ -1,6 +1,6 @@
 class Reservation < ApplicationRecord
   validates :email, :phone, presence: true
-  
+
   def self.coerce_time(value)
     return value if value.acts_like?(:time)
 

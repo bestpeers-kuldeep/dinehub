@@ -99,7 +99,7 @@ RSpec.describe "Auth API", type: :request do
     get "Get the current user" do
       tags "Auth"
       produces "application/json"
-      security [{ BearerAuth: [] }, { CookieAuth: [] }]
+      security [ { BearerAuth: [] }, { CookieAuth: [] } ]
       parameter name: :Authorization, in: :header, type: :string, required: false
 
       response "200", "current user" do
