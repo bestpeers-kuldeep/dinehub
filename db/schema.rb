@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_23_133000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_28_112039) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -52,6 +52,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_23_133000) do
     t.string "phone", null: false
     t.string "resume_link"
     t.datetime "updated_at", null: false
+  end
+
+  create_table "cart_items", force: :cascade do |t|
+    t.bigint "cart_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "menu_item_id", null: false
+    t.integer "quantity", null: false
+    t.decimal "unit_price"
+    t.datetime "updated_at", null: false
+    t.index ["cart_id", "menu_item_id"], name: "index_cart_items_on_cart_id_and_menu_item_id", unique: true
+    t.index ["cart_id"], name: "index_cart_items_on_cart_id"
+    t.index ["menu_item_id"], name: "index_cart_items_on_menu_item_id"
+  end
+
+  create_table "carts", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "deleted_at"
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_carts_on_user_id"
   end
 
   create_table "event_items", force: :cascade do |t|
@@ -156,6 +177,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_23_133000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "cart_items", "carts"
+  add_foreign_key "cart_items", "menu_items"
+  add_foreign_key "carts", "users"
   add_foreign_key "event_items", "events"
   add_foreign_key "menu_categories", "menus"
   add_foreign_key "menu_items", "menu_categories"
