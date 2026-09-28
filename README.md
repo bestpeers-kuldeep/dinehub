@@ -109,6 +109,6 @@ bin/bundler-audit
 ## Configuration notes
 
 - **Generated URLs.** Set `APP_HOST` (and optionally `APP_PROTOCOL` / `APP_PORT`) so Active Storage and mailer links match the host you use. Development also allows ngrok hostnames.
-- **Production.** `APP_HOST` is required. CORS defaults to `https://${APP_HOST}`; set `CORS_ORIGINS` to override. `DATABASE_URL` is the database connection.
+- **Active Storage.** Development and test store files on disk. Production uses Cloudinary only for Active Storage uploads (menu images, event logos, career resumes). Set `CLOUDINARY_URL` (`cloudinary://API_KEY:API_SECRET@CLOUD_NAME`) from the Cloudinary console. Optional: `CLOUDINARY_FOLDER` (default `dinehub`).
 - **Jobs.** Reservation emails use Active Job. In Kamal production, `SOLID_QUEUE_IN_PUMA` runs the Solid Queue supervisor inside Puma.
 - **Deploy.** Production image build is in `Dockerfile`; Kamal config is `config/deploy.yml`.

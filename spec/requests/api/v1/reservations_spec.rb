@@ -36,6 +36,7 @@ RSpec.describe "Table reservations API", type: :request do
             "type" => "TableReservation",
             "start_time" => reservation_attributes[:start_time],
             "estimated_end_time" => "20:00",
+            "estimated_duration_minutes" => 120,
             "number_of_people" => 2,
             "full_name" => "Alex Guest"
           )
@@ -77,6 +78,16 @@ RSpec.describe "Table reservations API", type: :request do
 
     expect(response).to have_http_status(:created)
     expect(json_body["full_name"]).to eq(guest[:full_name])
+  end
+
+  it "accepts a custom estimated duration" do
+    post "/api/v1/reservations",
+      params: reservation_attributes.merge(estimated_duration_minutes: 90),
+      as: :json
+
+    expect(response).to have_http_status(:created)
+    expect(json_body["estimated_duration_minutes"]).to eq(90)
+    expect(json_body["estimated_end_time"]).to eq("19:30")
   end
 
   it "reduces location availability after a booking" do

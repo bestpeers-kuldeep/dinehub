@@ -47,8 +47,26 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = false
 
   # Use Letter Opener Web to preview emails in the browser
-  config.action_mailer.delivery_method = :letter_opener_web
+  # config.action_mailer.delivery_method = :letter_opener_web
+  # config.action_mailer.perform_deliveries = true
+
+
+  config.action_mailer.delivery_method = :smtp
   config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
+  config.action_mailer.perform_caching = false
+
+  config.action_mailer.smtp_settings = {
+    address: ENV.fetch("SMTP_ADDRESS", "smtp.gmail.com"),
+    port: Integer(ENV.fetch("SMTP_PORT", "587")),
+    domain: ENV.fetch("SMTP_DOMAIN", default_url_options[:host]),
+    user_name: ENV.fetch("SMTP_USERNAME"),
+    password: ENV.fetch("SMTP_PASSWORD"),
+    authentication: ENV.fetch("SMTP_AUTHENTICATION", "plain").to_sym,
+    enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS_AUTO", "true") == "true",
+    open_timeout: 10,
+    read_timeout: 10
+  }
 
   # Make template changes take effect immediately.
   config.action_mailer.perform_caching = false

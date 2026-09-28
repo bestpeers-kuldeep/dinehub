@@ -18,7 +18,8 @@ module Api
             location: location,
             date: reservation_params[:reservation_date],
             start_time: reservation_params[:start_time],
-            capacity: party_size
+            capacity: party_size,
+            duration_minutes: duration_minutes
           )
 
           if table.nil?
@@ -36,6 +37,8 @@ module Api
         render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
       rescue ActiveRecord::RecordNotUnique
         render json: { errors: [ "no tables available at this location for the requested time" ] }, status: :conflict
+      rescue ArgumentError, TypeError => e
+        render json: { errors: [ e.message ] }, status: :bad_request
       rescue StandardError => e
         render json: { error: e.message }, status: :internal_server_error
       end
@@ -50,9 +53,15 @@ module Api
         params[:number_of_people].presence || params.dig(:reservation, :number_of_people)
       end
 
+      def duration_minutes
+        value = reservation_params[:estimated_duration_minutes].presence ||
+          TableReservation::DEFAULT_ESTIMATED_DURATION_MINUTES
+        Integer(value)
+      end
+
       def reservation_params
         permitted = %i[
-          location reservation_date start_time number_of_people
+          location reservation_date start_time estimated_duration_minutes number_of_people
           full_name first_name last_name email phone occasion special_requests marketing_opt_in
         ]
         if params[:reservation].present?

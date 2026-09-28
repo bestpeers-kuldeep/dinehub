@@ -16,7 +16,7 @@ cors_origins = if Rails.env.production?
   Rails.application.config.x.cors_origins
 else
   ENV.fetch("CORS_ORIGINS") {
-    "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://localhost:3001,https://#{ENV.fetch("APP_HOST")}"
+    "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000,http://localhost:3001, https://food-client-three.vercel.app/ ,https://#{ENV.fetch("APP_HOST")}"
   }
 end
 

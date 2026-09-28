@@ -1,4 +1,12 @@
 Rails.application.routes.draw do
+  namespace :admin do
+    resources :administrators
+    resources :tables
+    resources :table_reservations
+    resources :users
+    root to: "administrators#index"
+  end
+
   if defined?(Rswag::Ui)
     mount Rswag::Ui::Engine => "/api-docs"
     mount Rswag::Api::Engine => "/api-docs"

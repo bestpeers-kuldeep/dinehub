@@ -21,6 +21,12 @@ def attach_seed_image!(record, attachment_name, path)
   filename = path.basename.to_s
   url_column = "#{attachment_name}_url"
 
+  already_on_cloudinary = attachment.attached? &&
+    attachment.blob.filename.to_s == filename &&
+    attachment.blob.service_name.to_s == "cloudinary"
+
+  return if already_on_cloudinary
+
   attachment.purge if attachment.attached?
   record.update_column(url_column, nil) if record.has_attribute?(url_column)
 
@@ -272,3 +278,13 @@ unless cocktail_bar_one.reservations.overlapping(Date.current, "11:30").exists?
 end
 
 puts "Seeded table reservations: #{TableReservation.count}"
+
+# --- Administrators (HTTP basic for /admin) ---
+administrator = Administrator.find_or_initialize_by(email: "admin@dinehub.local")
+administrator.first_name = "Admin" if administrator.first_name.blank?
+administrator.last_name = "User" if administrator.last_name.blank?
+administrator.password = "password123" if administrator.new_record?
+administrator.save!
+puts "Seeded administrators: #{Administrator.count} (admin login: #{administrator.email})"
+
+load Rails.root.join("db/seeds/cloudinary_attachments.rb")

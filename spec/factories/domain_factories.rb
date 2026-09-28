@@ -11,6 +11,13 @@ FactoryBot.define do
     password { "password123" }
   end
 
+  factory :administrator do
+    first_name { "Admin" }
+    last_name { "User" }
+    sequence(:email) { |n| "admin#{n}@dinehub.local" }
+    password { "password123" }
+  end
+
   factory :career do
     full_name { "Alex Guest" }
     email

@@ -9,12 +9,14 @@ RSpec.describe "Tables API", type: :request do
       parameter name: :start_time, in: :query, type: :string, required: true
       parameter name: :location, in: :query, schema: { "$ref" => "#/components/schemas/Location" }, required: false
       parameter name: :capacity, in: :query, type: :integer, required: false
+      parameter name: :estimated_duration_minutes, in: :query, type: :integer, required: false
 
       response "200", "availability returned" do
         let(:date) { attributes_for(:table_reservation)[:reservation_date].to_s }
         let(:start_time) { "18:00" }
         let(:location) { nil }
         let(:capacity) { nil }
+        let(:estimated_duration_minutes) { nil }
         let!(:booked_table) { create(:table, location: "Cocktail Bar") }
         let!(:available_table) { create(:table, location: "Cocktail Bar") }
         let!(:patio_table) { create(:table, location: "Covered Patio") }
@@ -34,8 +36,17 @@ RSpec.describe "Tables API", type: :request do
 
           expect(cocktail_bar["available_tables"]).to eq(1)
           expect(patio["available_tables"]).to eq(1)
-          expect(payload["tables"]).to be_nil
-          expect(response.body).not_to include(booked_table.name)
+          expect(payload["estimated_duration_minutes"]).to eq(120)
+          expect(payload["estimated_end_time"]).to eq("20:00")
+
+          booked = payload.fetch("tables").find { |table| table["id"] == booked_table.id }
+          available = payload.fetch("tables").find { |table| table["id"] == available_table.id }
+          expect(booked).to include(
+            "status" => "booked",
+            "booked_from" => "18:00",
+            "booked_until" => "20:00"
+          )
+          expect(available["status"]).to eq("available")
         end
       end
 
@@ -44,6 +55,7 @@ RSpec.describe "Tables API", type: :request do
         let(:start_time) { nil }
         let(:location) { nil }
         let(:capacity) { nil }
+        let(:estimated_duration_minutes) { nil }
         run_test!
       end
     end

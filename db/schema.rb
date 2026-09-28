@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_23_133000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_25_101003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_23_133000) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "administrators", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.string "first_name", null: false
+    t.string "last_name", null: false
+    t.string "password_digest", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_administrators_on_email", unique: true
   end
 
   create_table "careers", force: :cascade do |t|
@@ -111,6 +121,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_23_133000) do
     t.text "description"
     t.string "duration"
     t.string "email", null: false
+    t.integer "estimated_duration_minutes", default: 120, null: false
     t.string "full_name"
     t.boolean "marketing_opt_in", default: false, null: false
     t.integer "number_of_people"

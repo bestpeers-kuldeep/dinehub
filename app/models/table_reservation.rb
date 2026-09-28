@@ -1,14 +1,19 @@
 class TableReservation < Reservation
-  # Guests pick a 30-minute arrival slot. The table is held for an estimated
-  # 2-hour dining window starting at that slot.
+  # Guests pick a 30-minute arrival slot. Bookings default to two hours, but
+  # administrators can adjust the estimated duration for each reservation.
   SLOT_MINUTES = 30
-  ESTIMATED_DURATION = 2.hours
+  DEFAULT_ESTIMATED_DURATION_MINUTES = 120
 
   belongs_to :table
 
   validates :reservation_date, presence: true
   validates :start_time, presence: true
   validates :full_name, presence: true
+  validates :estimated_duration_minutes, numericality: {
+    only_integer: true,
+    greater_than: 0,
+    less_than_or_equal_to: 24.hours.in_minutes
+  }
   validate :start_time_on_half_hour_slot
   validate :no_overlapping_reservation
 
@@ -18,17 +23,19 @@ class TableReservation < Reservation
 
   # Estimated leave time for availability checks only (not a DB column).
   def estimated_end_time
-    parsed_start_time + ESTIMATED_DURATION
+    parsed_start_time + estimated_duration_minutes.minutes
   end
 
   scope :overlapping, ->(date, start_time, end_time = nil) {
     start_at = coerce_time(start_time)
-    end_at = end_time.present? ? coerce_time(end_time) : start_at + ESTIMATED_DURATION
-    window_start = start_at - ESTIMATED_DURATION
+    end_at = end_time.present? ? coerce_time(end_time) : start_at + DEFAULT_ESTIMATED_DURATION_MINUTES.minutes
 
     where(reservation_date: date)
       .where("start_time < ?", sql_time(end_at))
-      .where("start_time > ?", sql_time(window_start))
+      .where(
+        "start_time + (estimated_duration_minutes * INTERVAL '1 minute') > ?",
+        sql_time(start_at)
+      )
   }
 
   def send_reservation_confirmation_email
@@ -43,6 +50,7 @@ class TableReservation < Reservation
       reservation_date: reservation_date,
       start_time: parsed_start_time.strftime("%H:%M"),
       estimated_end_time: estimated_end_time.strftime("%H:%M"),
+      estimated_duration_minutes: estimated_duration_minutes,
       number_of_people: number_of_people,
       full_name: full_name,
       email: email,

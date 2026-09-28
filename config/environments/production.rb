@@ -69,6 +69,8 @@ Rails.application.configure do
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.perform_caching = false
 
+  # Render blocks outbound traffic on the usual SMTP ports (25, 465, 587), so
+  # production defaults to Brevo's alternate port 2525, which is not blocked.
   config.action_mailer.smtp_settings = {
     address: ENV.fetch("SMTP_ADDRESS", "smtp.gmail.com"),
     port: Integer(ENV.fetch("SMTP_PORT", "587")),
@@ -77,8 +79,8 @@ Rails.application.configure do
     password: ENV.fetch("SMTP_PASSWORD"),
     authentication: ENV.fetch("SMTP_AUTHENTICATION", "plain").to_sym,
     enable_starttls_auto: ENV.fetch("SMTP_ENABLE_STARTTLS_AUTO", "true") == "true",
-    open_timeout: 10,
-    read_timeout: 10
+    open_timeout: Integer(ENV.fetch("SMTP_OPEN_TIMEOUT", "10")),
+    read_timeout: Integer(ENV.fetch("SMTP_READ_TIMEOUT", "10"))
   }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to

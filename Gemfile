@@ -47,6 +47,11 @@ gem "rack-cors"
 gem "rswag-api"
 gem "rswag-ui"
 
+# Asset pipeline required by Administrate in this API-only app
+gem "sprockets-rails"
+
+gem "administrate", ">= 0.20.1"
+
 group :development, :test do
   # Load .env into ENV for local development/test
   gem "dotenv-rails"

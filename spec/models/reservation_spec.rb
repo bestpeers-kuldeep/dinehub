@@ -45,6 +45,20 @@ RSpec.describe Reservation, type: :model do
     expect(later).to be_valid
   end
 
+  it "uses a configurable estimated duration when checking availability" do
+    reservation = create(
+      :table_reservation,
+      table: table,
+      reservation_date: date,
+      start_time: "11:30",
+      estimated_duration_minutes: 90
+    )
+
+    expect(reservation.estimated_end_time.strftime("%H:%M")).to eq("13:00")
+    expect(table).not_to be_available_between(date, "12:30")
+    expect(table).to be_available_between(date, "13:00")
+  end
+
   it "enqueues a confirmation email after the reservation is saved" do
     expect do
       create(:table_reservation, table: table, reservation_date: date, start_time: "11:30")
