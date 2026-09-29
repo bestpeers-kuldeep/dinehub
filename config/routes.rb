@@ -33,6 +33,7 @@ Rails.application.routes.draw do
       get "auth/me", to: "auth#me"
       post "auth/forgot_password", to: "auth#forgot_password"
       post "auth/reset_password", to: "auth#reset_password"
+      patch "profile", to: "auth#update_profile"
     end
   end
 
