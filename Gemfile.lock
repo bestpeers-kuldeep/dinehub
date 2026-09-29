@@ -427,6 +427,7 @@ DEPENDENCIES
   debug
   dotenv-rails
   factory_bot_rails
+  faraday
   image_processing (~> 1.2)
   json (~> 2.10)
   jwt (~> 2.10)

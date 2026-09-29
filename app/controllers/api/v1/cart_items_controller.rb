@@ -5,15 +5,18 @@ module Api
       before_action :set_cart_item, only: %i[update destroy]
 
       def create
-        cart_item = ::CartItems::AddToCart.call(current_user, cart_item_params)
+        cart_items = ::CartItems::AddToCart.call(
+          current_user,
+          cart_item_params
+        )
 
-        render json: cart_item, status: :created
+        render json: cart_items, status: :created
       rescue ActiveRecord::RecordNotFound
         render json: { error: "Menu item not found" }, status: :not_found
       end
 
       def update
-        if @cart_item.update(quantity: cart_item_params[:quantity])
+        if @cart_item.update(quantity: update_cart_item_params[:quantity])
           render json: @cart_item
         else
           render_errors(@cart_item)
@@ -27,6 +30,10 @@ module Api
 
       private
 
+      def update_cart_item_params
+        params.require(:cart_item).permit(:quantity)
+      end
+
       def set_cart_item
         cart = current_user.carts.active.first
         @cart_item = cart&.cart_items&.find(params[:id])
@@ -37,7 +44,9 @@ module Api
       end
 
       def cart_item_params
-        params.require(:cart_item).permit(:menu_item_id, :quantity)
+        params.require(:cart_items).map do |item|
+          item.permit(:menu_item_id, :quantity)
+        end
       end
 
       def render_errors(record)

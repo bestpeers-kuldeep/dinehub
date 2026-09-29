@@ -22,7 +22,9 @@ Rails.application.routes.draw do
       resource :cart, only: [ :show, :destroy ] do
         resources :items, controller: "cart_items", only: [ :create, :update, :destroy ]
       end
-      resources :orders, only: [ :index, :show, :create ]
+      resources :orders, only: %i[index show create] do
+        resources :payments, only: :create
+      end
       get "specials", to: "specials#index"
 
       post "auth/register", to: "auth#register"

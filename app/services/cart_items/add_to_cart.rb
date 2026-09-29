@@ -12,17 +12,27 @@ module CartItems
     def call
       cart = @user.carts.active.first || @user.carts.create!
 
+      CartItem.transaction do
+        @params.map do |item_params|
+          add_item(cart, item_params)
+        end
+      end
+    end
+
+    private
+
+    def add_item(cart, item_params)
       cart_item = cart.cart_items.find_or_initialize_by(
-        menu_item_id: @params[:menu_item_id]
+        menu_item_id: item_params[:menu_item_id]
       )
 
       if cart_item.persisted?
-        cart_item.quantity += @params[:quantity].to_i
+        cart_item.quantity += item_params[:quantity].to_i
       else
-        menu_item = MenuItem.find(@params[:menu_item_id])
+        menu_item = MenuItem.find(item_params[:menu_item_id])
 
         cart_item.assign_attributes(
-          quantity: @params[:quantity],
+          quantity: item_params[:quantity],
           unit_price: menu_item.price
         )
       end

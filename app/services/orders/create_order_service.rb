@@ -1,12 +1,13 @@
 module Orders
   class CreateOrderService
-    def initialize(user)
+    def initialize(user, cart_id)
       @user = user
+      @cart_id = cart_id
     end
 
     def call
-      cart = @user.carts.active.first
-      cart_items = cart&.cart_items&.includes(:menu_item)
+      cart = @user.carts.active.find(@cart_id)
+      cart_items = cart.cart_items.includes(:menu_item)
 
       raise StandardError, "Cart is empty" if cart_items.blank?
 
@@ -21,7 +22,6 @@ module Orders
         )
 
         create_order_items(order, cart_items)
-        cart.update!(status: :completed)
 
         order
       end
