@@ -3,5 +3,5 @@ class Cart < ApplicationRecord
   has_many :cart_items, dependent: :destroy
 
   enum :status, { active: 0, completed: 1 }
-  scope :active, -> { where(deleted_at: nil) }
+  scope :active, -> { where(status: :active, deleted_at: nil) }
 end
