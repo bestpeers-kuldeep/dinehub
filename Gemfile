@@ -46,7 +46,7 @@ gem "rack-cors"
 # Use Swagger for API documentation
 gem "rswag-api"
 gem "rswag-ui"
-
+gem "faraday"
 group :development, :test do
   # Load .env into ENV for local development/test
   gem "dotenv-rails"

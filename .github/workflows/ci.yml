@@ -93,6 +93,9 @@ jobs:
           CLOUDINARY_API_KEY: test
           CLOUDINARY_CLOUD_NAME: test
           API_SECRET: test
+          API_URL: https://sandbox.cashfree.com/pg/orders
+          CASHFREE_APP_ID: test
+          CASHFREE_SECRET_KEY: test
           # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
           # REDIS_URL: redis://localhost:6379/0
         run: |

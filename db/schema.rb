@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_28_112122) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_29_102809) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -149,6 +149,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_112122) do
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
+  create_table "payments", force: :cascade do |t|
+    t.decimal "amount", precision: 12, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.string "currency", null: false
+    t.string "gateway", null: false
+    t.string "gateway_order_id"
+    t.string "gateway_payment_id"
+    t.jsonb "metadata", default: {}, null: false
+    t.bigint "order_id", null: false
+    t.string "payment_session_id"
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["gateway", "gateway_order_id"], name: "index_payments_on_gateway_and_gateway_order_id", unique: true
+    t.index ["gateway_order_id"], name: "index_payments_on_gateway_order_id"
+    t.index ["order_id"], name: "index_payments_on_order_id"
+  end
+
   create_table "reservations", force: :cascade do |t|
     t.decimal "budget_per_person", precision: 10, scale: 2
     t.string "company"
@@ -210,5 +227,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_28_112122) do
   add_foreign_key "order_items", "menu_items"
   add_foreign_key "order_items", "orders"
   add_foreign_key "orders", "users"
+  add_foreign_key "payments", "orders"
   add_foreign_key "reservations", "tables"
 end
