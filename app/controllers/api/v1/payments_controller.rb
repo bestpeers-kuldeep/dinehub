@@ -11,7 +11,11 @@ module Api
           order_id: @order.id,
           payment: payment_response(payment)
         }, status: :ok
-      rescue StandardError => e
+      rescue ::Payments::Errors::Gateway => e
+        Rails.logger.error("Payment gateway error for order #{@order.id}: #{e.message}")
+
+        render json: { error: "Payment gateway is unavailable, please try again" }, status: :bad_gateway
+      rescue ::Payments::Errors::OrderNotPayable, ActiveRecord::RecordInvalid => e
         render json: { error: e.message }, status: :unprocessable_entity
       end
 

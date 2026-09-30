@@ -6,8 +6,9 @@ module Api
 
       def index
         orders = current_user.orders
-                            .includes(:order_items, :payment)
-                            .order(created_at: :desc)
+                         .active
+                         .includes(:order_items, :payment)
+                         .order(created_at: :desc)
 
         render json: orders.as_json(
           include: {
@@ -39,6 +40,14 @@ module Api
         }, status: :created
       rescue StandardError => e
         render json: { error: e.message }, status: :unprocessable_entity
+      end
+
+      def payment_return
+        render json: {
+          message: "Payment flow completed",
+          order_id: params[:id],
+          gateway_order_id: params[:order_id]
+        }
       end
 
       private

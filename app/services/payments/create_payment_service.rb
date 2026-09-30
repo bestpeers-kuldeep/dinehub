@@ -2,32 +2,41 @@ module Payments
   class CreatePaymentService
     def initialize(order, gateway: "cashfree")
       @order = order
-      @gateway = gateway
+      @gateway = gateway.to_s
     end
 
     def call
-      payment = find_or_create_payment
+      provider = gateway_service # fail fast on unknown gateways, before touching the DB
 
-      gateway_response = gateway_service.new(@order).call
+      payment = @order.with_lock do
+        ensure_payable!
+        find_or_create_payment
+      end
 
-      payment.update!(
-        gateway_order_id: gateway_response["order_id"],
-        payment_session_id: gateway_response["payment_session_id"],
-        metadata: gateway_response,
-        status: :pending
-      )
+      # A retry of an in-progress checkout already has a session. Reusing it
+      # avoids a second Cashfree order for the same checkout.
+      return payment.reload if payment.payment_session_id.present?
+
+      gateway_response = provider.new(@order).call
+      store_gateway_response(payment, gateway_response)
 
       payment
     end
 
     private
 
+    def ensure_payable!
+      if @order.payment&.successful?
+        raise Errors::OrderNotPayable, "Order is already paid"
+      end
+
+      if @order.completed? || @order.cancelled?
+        raise Errors::OrderNotPayable, "Order is #{@order.status} and cannot accept a payment"
+      end
+    end
+
     def find_or_create_payment
-      payment = @order.payment
-
-      raise StandardError, "Order is already paid" if payment&.successful?
-
-      payment || Payment.create!(
+      @order.payment || Payment.create!(
         order: @order,
         gateway: @gateway,
         amount: @order.total,
@@ -36,15 +45,26 @@ module Payments
       )
     end
 
-    def gateway_service
-      case @gateway
-      when "cashfree"
-        Cashfree::CreateOrder
-      when "stripe"
-        Stripe::CreateOrder
-      else
-        raise StandardError, "Unsupported payment gateway"
+    # The gateway call sits outside the lock. A webhook can finalize the
+    # payment in that window, so this write must not move a successful payment
+    # back to pending.
+    def store_gateway_response(payment, response)
+      @order.with_lock do
+        payment.lock!
+
+        next if payment.successful?
+
+        payment.update!(
+          gateway_order_id: response["order_id"],
+          payment_session_id: response["payment_session_id"],
+          metadata: payment.metadata.merge(response),
+          status: :pending
+        )
       end
+    end
+
+    def gateway_service
+      Payments::Providers::Factory.for(@gateway)
     end
   end
 end
