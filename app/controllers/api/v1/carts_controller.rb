@@ -22,14 +22,14 @@ module Api
 
         cart.with_lock do
           if cart.orders.active.exists?
-            raise ::Orders::CartNotEditable, "Cart is checked out and cannot be cleared"
+            raise ::Orders::Errors::CartNotEditable, "Cart is checked out and cannot be cleared"
           end
 
           cart.update!(deleted_at: Time.current)
         end
 
         render json: { message: "Cart cleared successfully" }
-      rescue ::Orders::CartNotEditable => e
+      rescue ::Orders::Errors::CartNotEditable => e
         render json: { error: e.message }, status: :unprocessable_entity
       end
     end

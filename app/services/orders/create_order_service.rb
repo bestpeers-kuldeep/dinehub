@@ -23,7 +23,7 @@ module Orders
 
     def create_order(cart)
       cart_items = cart.cart_items.includes(:menu_item).to_a
-      raise CartEmpty, "Cart is empty" if cart_items.empty?
+      raise Errors::CartEmpty, "Cart is empty" if cart_items.empty?
 
       subtotal = cart_items.sum { |item| item.quantity * item.unit_price }
 

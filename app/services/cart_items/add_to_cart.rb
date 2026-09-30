@@ -15,7 +15,7 @@ module CartItems
       # Same cart row lock as checkout, so an item cannot be added while an
       # order is being snapshotted from this cart.
       cart.with_lock do
-        raise Orders::CartNotEditable, "Cart is checked out and cannot be changed" if cart.orders.active.exists?
+        raise Orders::Errors::CartNotEditable, "Cart is checked out and cannot be changed" if cart.orders.active.exists?
 
         @params.map do |item_params|
           add_item(cart, item_params)

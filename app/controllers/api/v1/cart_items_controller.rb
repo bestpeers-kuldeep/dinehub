@@ -13,7 +13,7 @@ module Api
         render json: cart_items, status: :created
       rescue ActiveRecord::RecordNotFound
         render json: { error: "Menu item not found" }, status: :not_found
-      rescue ::Orders::CartNotEditable => e
+      rescue ::Orders::Errors::CartNotEditable => e
         render json: { error: e.message }, status: :unprocessable_entity
       end
 
@@ -24,7 +24,7 @@ module Api
         end
 
         render json: @cart_item
-      rescue ::Orders::CartNotEditable => e
+      rescue ::Orders::Errors::CartNotEditable => e
         render json: { error: e.message }, status: :unprocessable_entity
       rescue ActiveRecord::RecordInvalid => e
         render_errors(e.record)
@@ -37,7 +37,7 @@ module Api
         end
 
         render json: { message: "Item removed from cart" }, status: :ok
-      rescue ::Orders::CartNotEditable => e
+      rescue ::Orders::Errors::CartNotEditable => e
         render json: { error: e.message }, status: :unprocessable_entity
       end
 
@@ -72,7 +72,7 @@ module Api
       def ensure_cart_editable!(cart)
         return unless cart.orders.active.exists?
 
-        raise ::Orders::CartNotEditable, "Cart is checked out and cannot be changed"
+        raise ::Orders::Errors::CartNotEditable, "Cart is checked out and cannot be changed"
       end
 
       def render_errors(record)
