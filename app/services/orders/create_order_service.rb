@@ -15,6 +15,7 @@ module Orders
         subtotal = calculate_subtotal(cart_items)
 
         order = @user.orders.create!(
+          cart: cart,
           status: :pending,
           subtotal: subtotal,
           tax: 0,

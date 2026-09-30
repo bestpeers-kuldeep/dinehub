@@ -37,14 +37,7 @@ module Payments
     end
 
     def gateway_service
-      case @gateway
-      when "cashfree"
-        Cashfree::CreateOrder
-      when "stripe"
-        Stripe::CreateOrder
-      else
-        raise StandardError, "Unsupported payment gateway"
-      end
+      Payments::Providers::Factory.for(@gateway)
     end
   end
 end

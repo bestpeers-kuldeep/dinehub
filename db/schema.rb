@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_29_132956) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_30_095708) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -73,6 +73,49 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_132956) do
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_carts_on_user_id"
+  end
+
+  create_table "deliveries", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "external_delivery_id"
+    t.jsonb "metadata"
+    t.bigint "order_id", null: false
+    t.string "provider"
+    t.decimal "rider_latitude"
+    t.decimal "rider_longitude"
+    t.string "rider_name"
+    t.string "rider_phone"
+    t.integer "status"
+    t.string "tracking_number"
+    t.string "tracking_url"
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_deliveries_on_order_id"
+    t.index ["provider", "external_delivery_id"], name: "index_deliveries_on_provider_and_external_delivery_id", unique: true, where: "(external_delivery_id IS NOT NULL)"
+  end
+
+  create_table "delivery_addresses", force: :cascade do |t|
+    t.text "address_line"
+    t.string "city"
+    t.datetime "created_at", null: false
+    t.boolean "is_default", default: false
+    t.string "landmark"
+    t.decimal "latitude"
+    t.decimal "longitude"
+    t.string "postal_code"
+    t.string "state"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_delivery_addresses_on_user_id"
+  end
+
+  create_table "delivery_events", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "delivery_id", null: false
+    t.string "event_type"
+    t.string "external_event_id"
+    t.jsonb "payload"
+    t.datetime "updated_at", null: false
+    t.index ["delivery_id"], name: "index_delivery_events_on_delivery_id"
   end
 
   create_table "event_items", force: :cascade do |t|
@@ -139,13 +182,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_132956) do
   end
 
   create_table "orders", force: :cascade do |t|
+    t.bigint "cart_id"
     t.datetime "created_at", null: false
+    t.bigint "delivery_address_id"
     t.integer "status", default: 0, null: false
     t.decimal "subtotal", precision: 10, scale: 2, null: false
     t.decimal "tax", precision: 10, scale: 2, default: "0.0", null: false
     t.decimal "total", precision: 10, scale: 2, null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
+    t.index ["cart_id"], name: "index_orders_on_cart_id"
+    t.index ["delivery_address_id"], name: "index_orders_on_delivery_address_id"
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
@@ -222,11 +269,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_29_132956) do
   add_foreign_key "cart_items", "carts"
   add_foreign_key "cart_items", "menu_items"
   add_foreign_key "carts", "users"
+  add_foreign_key "deliveries", "orders"
+  add_foreign_key "delivery_addresses", "users"
+  add_foreign_key "delivery_events", "deliveries"
   add_foreign_key "event_items", "events"
   add_foreign_key "menu_categories", "menus"
   add_foreign_key "menu_items", "menu_categories"
   add_foreign_key "order_items", "menu_items"
   add_foreign_key "order_items", "orders"
+  add_foreign_key "orders", "carts"
+  add_foreign_key "orders", "delivery_addresses"
   add_foreign_key "orders", "users"
   add_foreign_key "payments", "orders"
   add_foreign_key "reservations", "tables"
