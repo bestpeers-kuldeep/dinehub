@@ -5,38 +5,36 @@ module Orders
       @cart_id = cart_id
     end
 
+    # Returns the open order for this cart. A second checkout while that order
+    # is still open returns the same row instead of creating another one.
     def call
-      cart = @user.carts.active.find(@cart_id)
-      cart_items = cart.cart_items.includes(:menu_item)
+      cart = @user.carts.find(@cart_id)
 
-      raise StandardError, "Cart is empty" if cart_items.blank?
+      # Lock the cart for the whole snapshot. Cart item writes take the same
+      # lock, so quantities cannot change between the read and the insert.
+      cart.with_lock do
+        raise ActiveRecord::RecordNotFound unless cart.live?
 
-      Order.transaction do
-        subtotal = calculate_subtotal(cart_items)
-
-        order = @user.orders.create!(
-          cart: cart,
-          status: :pending,
-          subtotal: subtotal,
-          tax: 0,
-          total: subtotal
-        )
-
-        create_order_items(order, cart_items)
-
-        order
+        cart.orders.active.order(created_at: :desc).first || create_order(cart)
       end
     end
 
     private
 
-    def calculate_subtotal(cart_items)
-      cart_items.sum do |item|
-        item.quantity * item.unit_price
-      end
-    end
+    def create_order(cart)
+      cart_items = cart.cart_items.includes(:menu_item).to_a
+      raise CartEmpty, "Cart is empty" if cart_items.empty?
 
-    def create_order_items(order, cart_items)
+      subtotal = cart_items.sum { |item| item.quantity * item.unit_price }
+
+      order = @user.orders.create!(
+        cart: cart,
+        status: :pending,
+        subtotal: subtotal,
+        tax: 0,
+        total: subtotal
+      )
+
       cart_items.each do |cart_item|
         order.order_items.create!(
           menu_item: cart_item.menu_item,
@@ -46,6 +44,8 @@ module Orders
           total_price: cart_item.quantity * cart_item.unit_price
         )
       end
+
+      order
     end
   end
 end

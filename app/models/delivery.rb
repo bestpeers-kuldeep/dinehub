@@ -13,4 +13,9 @@ class Delivery < ApplicationRecord
     cancelled: 6,
     failed: 7
   }
+
+  validates :status, presence: true
+  # One delivery per order (Order has_one :delivery); unique index on order_id.
+  validates :order_id, uniqueness: true
+  validates :external_delivery_id, uniqueness: { scope: :provider }, allow_nil: true
 end

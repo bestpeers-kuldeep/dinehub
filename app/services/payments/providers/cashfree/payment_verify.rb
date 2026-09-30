@@ -5,9 +5,16 @@ require "json"
 module Payments
   module Providers
     module Cashfree
+      # Verifies a Cashfree payment webhook and moves the payment/order to a
+      # terminal state. Safe to call multiple times for the same event:
+      # Cashfree retries webhooks, so all state checks happen under a row lock.
       class PaymentVerify
+        GATEWAY = "cashfree".freeze
+        SUCCESS_STATUSES = %w[SUCCESS].freeze
+        FAILURE_STATUSES = %w[FAILED USER_DROPPED].freeze
+
         def initialize(raw_body:, signature:, timestamp:)
-          @raw_body = raw_body
+          @raw_body = raw_body.to_s
           @signature = signature
           @timestamp = timestamp
         end
@@ -15,115 +22,126 @@ module Payments
         def call
           verify_signature!
 
-          payload = JSON.parse(@raw_body)
+          payload = parse_payload
+          payment_status = payload.dig("data", "payment", "payment_status")
+          gateway_payment_id = payload.dig("data", "payment", "cf_payment_id")
+          gateway_order_id = payload.dig("data", "order", "order_id")
 
-          payment_data = payload["data"]&.fetch("payment", {})
-          order_data = payload["data"]&.fetch("order", {})
-
-          payment_status = payment_data["payment_status"]
-          gateway_order_id = order_data["order_id"]
-          gateway_payment_id = payment_data["cf_payment_id"]
-
-          payment = Payment.find_by!(
-            gateway_order_id: gateway_order_id
-          )
-
-          return if terminal_payment?(payment)
-
-          case payment_status
-          when "SUCCESS"
-            handle_success(payment, gateway_payment_id, payload)
-          when "FAILED", "USER_DROPPED"
-            handle_failure(payment, gateway_payment_id, payment_status, payload)
-          else
-            Rails.logger.info(
-              "Cashfree webhook ignored: payment_status=#{payment_status}"
-            )
+          if gateway_order_id.blank?
+            raise Errors::InvalidPayload, "Webhook payload is missing data.order.order_id"
           end
+
+          payment = Payment.find_by!(gateway: GATEWAY, gateway_order_id: gateway_order_id)
+
+          # Lock order first, then payment. CreatePaymentService uses the same
+          # order -> payment locking sequence, which avoids deadlocks between a
+          # checkout retry and an in-flight webhook.
+          payment.order.with_lock do
+            payment.lock!
+
+            apply_transition(payment, payment_status, gateway_payment_id, payload)
+          end
+
+          payment
         end
 
         private
 
-        def handle_success(payment, gateway_payment_id, payload)
-          payment.order.with_lock do
-            payment.update!(
-              gateway_payment_id: gateway_payment_id,
-              status: :successful,
-              metadata: payment.metadata.merge(payload)
-            )
-
-            payment.order.update!(
-              status: :completed
-            )
-
-            soft_delete_cart(payment.order)
+        def apply_transition(payment, payment_status, gateway_payment_id, payload)
+          # A successful payment is final; nothing can override it.
+          if payment.successful?
+            log_ignored(payment, payment_status, "payment already successful")
+            return
           end
 
-          payment
+          case payment_status
+          when *SUCCESS_STATUSES
+            # A SUCCESS may legitimately arrive after a FAILED/USER_DROPPED for
+            # an earlier attempt on the same gateway order, so failed -> successful
+            # is allowed; the customer has been charged and must get their order.
+            mark_successful(payment, gateway_payment_id, payload)
+          when *FAILURE_STATUSES
+            if payment.failed?
+              log_ignored(payment, payment_status, "payment already failed")
+            else
+              mark_failed(payment, gateway_payment_id, payment_status, payload)
+            end
+          else
+            log_ignored(payment, payment_status, "unhandled payment_status")
+          end
         end
 
-        def handle_failure(payment, gateway_payment_id, payment_status, payload)
-          payment.order.with_lock do
-            payment.update!(
-              gateway_payment_id: gateway_payment_id,
-              status: :failed,
-              metadata: payment.metadata.merge(
-                payload.merge(
-                  "final_payment_status" => payment_status
-                )
-              )
-            )
+        def mark_successful(payment, gateway_payment_id, payload)
+          payment.update!(
+            gateway_payment_id: gateway_payment_id,
+            status: :successful,
+            metadata: payment.metadata.merge("webhook" => payload)
+          )
 
-            payment.order.update!(
-              status: :cancelled
-            )
+          payment.order.update!(status: :completed)
 
-            soft_delete_cart(payment.order)
+          complete_cart(payment.order.cart)
+        end
+
+        def mark_failed(payment, gateway_payment_id, payment_status, payload)
+          payment.update!(
+            gateway_payment_id: gateway_payment_id,
+            status: :failed,
+            metadata: payment.metadata.merge(
+              "webhook" => payload,
+              "final_payment_status" => payment_status
+            )
+          )
+
+          payment.order.update!(status: :cancelled)
+
+          # The cart is deliberately left untouched on failure so the customer
+          # can retry checkout without rebuilding it.
+        end
+
+        # Marks the cart that produced this order as consumed. Uses the order's
+        # own cart rather than "any live cart for the user" so a cart the user
+        # started after checkout is never wiped by a late webhook.
+        def complete_cart(cart)
+          return if cart.nil? || cart.deleted_at.present?
+
+          cart.update!(status: :completed, deleted_at: Time.current)
+        end
+
+        def log_ignored(payment, payment_status, reason)
+          Rails.logger.info(
+            "Cashfree webhook ignored: payment_id=#{payment.id} " \
+            "payment_status=#{payment_status.inspect} reason=#{reason}"
+          )
+        end
+
+        def parse_payload
+          payload = JSON.parse(@raw_body)
+
+          unless payload.is_a?(Hash)
+            raise Errors::InvalidPayload, "Webhook payload must be a JSON object"
           end
 
-          payment
-        end
-
-        def terminal_payment?(payment)
-          payment.successful? || payment.failed?
+          payload
+        rescue JSON::ParserError => e
+          raise Errors::InvalidPayload, "Invalid JSON payload: #{e.message}"
         end
 
         def verify_signature!
-          raise "Missing Cashfree webhook signature" if @signature.blank?
-          raise "Missing Cashfree webhook timestamp" if @timestamp.blank?
+          raise Errors::Signature, "Missing Cashfree webhook signature" if @signature.blank?
+          raise Errors::Signature, "Missing Cashfree webhook timestamp" if @timestamp.blank?
 
-          signed_payload = "#{@timestamp}#{@raw_body}"
-
-          digest = OpenSSL::Digest.new("SHA256")
-
-          generated_signature = Base64.strict_encode64(
-            OpenSSL::HMAC.digest(
-              digest,
-              ENV.fetch("CASHFREE_SECRET_KEY"),
-              signed_payload
-            )
+          expected_signature = Base64.strict_encode64(
+            OpenSSL::HMAC.digest("SHA256", secret_key, "#{@timestamp}#{@raw_body}")
           )
 
-          return if ActiveSupport::SecurityUtils.secure_compare(
-            generated_signature,
-            @signature
-          )
+          return if ActiveSupport::SecurityUtils.secure_compare(expected_signature, @signature)
 
-          raise "Invalid Cashfree webhook signature"
+          raise Errors::Signature, "Invalid Cashfree webhook signature"
         end
 
-        def soft_delete_cart(order)
-          cart = Cart.find_by(
-            user_id: order.user_id,
-            deleted_at: nil
-          )
-
-          return unless cart
-
-          cart.update!(
-            status: "completed",
-            deleted_at: Time.current
-          )
+        def secret_key
+          ENV.fetch("CASHFREE_SECRET_KEY")
         end
       end
     end

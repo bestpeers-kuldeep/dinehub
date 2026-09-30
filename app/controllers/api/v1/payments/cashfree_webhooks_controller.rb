@@ -10,17 +10,18 @@ module Api
           ).call
 
           render json: { success: true }, status: :ok
-        rescue JSON::ParserError
-          render json: { error: "Invalid JSON payload" }, status: :bad_request
+        rescue ::Payments::Errors::Signature => e
+          Rails.logger.warn("Cashfree webhook rejected: #{e.message}")
+
+          render json: { error: "Invalid webhook signature" }, status: :unauthorized
+        rescue ::Payments::Errors::InvalidPayload => e
+          render json: { error: e.message }, status: :bad_request
         rescue ActiveRecord::RecordNotFound
           render json: { error: "Payment not found" }, status: :not_found
-        rescue StandardError => e
-          Rails.logger.error(
-            "Cashfree webhook failed: #{e.class} - #{e.message}"
-          )
-
-          render json: { error: e.message }, status: :unprocessable_entity
         end
+
+        # Anything else (DB down, unexpected exception) intentionally propagates
+        # as a 500 so Cashfree retries the delivery and the error is reported.
       end
     end
   end

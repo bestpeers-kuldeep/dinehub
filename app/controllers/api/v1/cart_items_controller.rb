@@ -13,21 +13,31 @@ module Api
         render json: cart_items, status: :created
       rescue ActiveRecord::RecordNotFound
         render json: { error: "Menu item not found" }, status: :not_found
+      rescue ::Orders::CartNotEditable => e
+        render json: { error: e.message }, status: :unprocessable_entity
       end
 
       def update
-        if @cart_item.update(quantity: update_cart_item_params[:quantity])
-          render json: @cart_item
-        else
-          render_errors(@cart_item)
+        @cart_item.cart.with_lock do
+          ensure_cart_editable!(@cart_item.cart)
+          @cart_item.update!(quantity: update_cart_item_params[:quantity])
         end
+
+        render json: @cart_item
+      rescue ::Orders::CartNotEditable => e
+        render json: { error: e.message }, status: :unprocessable_entity
+      rescue ActiveRecord::RecordInvalid => e
+        render_errors(e.record)
       end
 
       def destroy
-        @cart_item.destroy!
+        @cart_item.cart.with_lock do
+          ensure_cart_editable!(@cart_item.cart)
+          @cart_item.destroy!
+        end
 
         render json: { message: "Item removed from cart" }, status: :ok
-      rescue => e
+      rescue ::Orders::CartNotEditable => e
         render json: { error: e.message }, status: :unprocessable_entity
       end
 
@@ -57,6 +67,12 @@ module Api
         params.require(:cart_items).map do |item|
           item.permit(:menu_item_id, :quantity)
         end
+      end
+
+      def ensure_cart_editable!(cart)
+        return unless cart.orders.active.exists?
+
+        raise ::Orders::CartNotEditable, "Cart is checked out and cannot be changed"
       end
 
       def render_errors(record)

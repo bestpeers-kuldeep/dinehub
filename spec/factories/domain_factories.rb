@@ -139,4 +139,48 @@ FactoryBot.define do
     start_time { "19:00" }
     end_time { "22:00" }
   end
+
+  factory :cart do
+    user
+    status { :active }
+  end
+
+  factory :order do
+    user
+    cart { association :cart, user: user }
+    status { :pending }
+    subtotal { 20.00 }
+    tax { 0 }
+    total { 20.00 }
+  end
+
+  factory :payment do
+    order
+    gateway { "cashfree" }
+    amount { 20.00 }
+    currency { "INR" }
+    status { :pending }
+    sequence(:gateway_order_id) { |n| "ORDER_#{n}" }
+    metadata { {} }
+  end
+
+  factory :delivery_address do
+    user
+    address_line { "12 Baker Street" }
+    city { "Mumbai" }
+    state { "Maharashtra" }
+    postal_code { "400001" }
+    is_default { false }
+  end
+
+  factory :delivery do
+    order
+    status { :pending }
+  end
+
+  factory :delivery_event do
+    delivery
+    event_type { "status_update" }
+    payload { {} }
+  end
 end

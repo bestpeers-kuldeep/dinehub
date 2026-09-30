@@ -5,57 +5,37 @@ module Api
       before_action :set_delivery_address, only: %i[show update destroy]
 
       def index
-        delivery_addresses = current_user.delivery_addresses
-                                         .order(is_default: :desc, created_at: :desc)
-
-        render json: delivery_addresses
+        render json: current_user.delivery_addresses.ordered
       end
 
       def show
         render json: @delivery_address
       end
 
+      # Keeping a single default per user is handled by the model callback and
+      # enforced by a partial unique index, so the controller only persists.
       def create
-        delivery_address = current_user.delivery_addresses.new(delivery_address_params)
-
-        DeliveryAddress.transaction do
-          if delivery_address.is_default?
-            current_user.delivery_addresses
-                        .where(is_default: true)
-                        .update_all(is_default: false)
-          end
-
-          delivery_address.save!
-        end
+        delivery_address = current_user.delivery_addresses.create!(delivery_address_params)
 
         render json: delivery_address, status: :created
       rescue ActiveRecord::RecordInvalid => e
-        render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+        render_errors(e.record)
       end
 
       def update
-        DeliveryAddress.transaction do
-          if delivery_address_params[:is_default] == true
-            current_user.delivery_addresses
-                        .where.not(id: @delivery_address.id)
-                        .where(is_default: true)
-                        .update_all(is_default: false)
-          end
-
-          @delivery_address.update!(delivery_address_params)
-        end
+        @delivery_address.update!(delivery_address_params)
 
         render json: @delivery_address
       rescue ActiveRecord::RecordInvalid => e
-        render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+        render_errors(e.record)
       end
 
       def destroy
         @delivery_address.destroy!
 
         render json: { message: "Delivery address deleted successfully" }
-      rescue StandardError => e
-        render json: { error: e.message }, status: :unprocessable_entity
+      rescue ActiveRecord::RecordNotDestroyed => e
+        render_errors(e.record)
       end
 
       private
@@ -77,6 +57,10 @@ module Api
           :longitude,
           :is_default
         )
+      end
+
+      def render_errors(record)
+        render json: { errors: record.errors.full_messages }, status: :unprocessable_entity
       end
     end
   end

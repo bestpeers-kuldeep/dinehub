@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_30_095708) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_30_142500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -73,6 +73,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_095708) do
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_carts_on_user_id"
+    t.index ["user_id"], name: "index_carts_on_user_id_one_active", unique: true, where: "((status = 0) AND (deleted_at IS NULL))"
   end
 
   create_table "deliveries", force: :cascade do |t|
@@ -85,36 +86,40 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_095708) do
     t.decimal "rider_longitude"
     t.string "rider_name"
     t.string "rider_phone"
-    t.integer "status"
+    t.integer "status", default: 0, null: false
     t.string "tracking_number"
     t.string "tracking_url"
     t.datetime "updated_at", null: false
-    t.index ["order_id"], name: "index_deliveries_on_order_id"
+    t.index ["order_id"], name: "index_deliveries_on_order_id", unique: true
     t.index ["provider", "external_delivery_id"], name: "index_deliveries_on_provider_and_external_delivery_id", unique: true, where: "(external_delivery_id IS NOT NULL)"
   end
 
   create_table "delivery_addresses", force: :cascade do |t|
-    t.text "address_line"
-    t.string "city"
+    t.text "address_line", null: false
+    t.string "city", null: false
     t.datetime "created_at", null: false
-    t.boolean "is_default", default: false
+    t.boolean "is_default", default: false, null: false
     t.string "landmark"
     t.decimal "latitude"
     t.decimal "longitude"
-    t.string "postal_code"
-    t.string "state"
+    t.string "postal_code", null: false
+    t.string "state", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["user_id"], name: "index_delivery_addresses_on_user_id"
+    t.index ["user_id"], name: "index_delivery_addresses_one_default_per_user", unique: true, where: "is_default"
+    t.check_constraint "latitude IS NULL OR latitude >= '-90'::integer::numeric AND latitude <= 90::numeric", name: "delivery_addresses_latitude_range"
+    t.check_constraint "longitude IS NULL OR longitude >= '-180'::integer::numeric AND longitude <= 180::numeric", name: "delivery_addresses_longitude_range"
   end
 
   create_table "delivery_events", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "delivery_id", null: false
-    t.string "event_type"
+    t.string "event_type", null: false
     t.string "external_event_id"
-    t.jsonb "payload"
+    t.jsonb "payload", default: {}
     t.datetime "updated_at", null: false
+    t.index ["delivery_id", "external_event_id"], name: "index_delivery_events_on_delivery_and_external_event", unique: true, where: "(external_event_id IS NOT NULL)"
     t.index ["delivery_id"], name: "index_delivery_events_on_delivery_id"
   end
 
@@ -182,7 +187,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_095708) do
   end
 
   create_table "orders", force: :cascade do |t|
-    t.bigint "cart_id"
+    t.bigint "cart_id", null: false
     t.datetime "created_at", null: false
     t.bigint "delivery_address_id"
     t.integer "status", default: 0, null: false
@@ -194,6 +199,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_095708) do
     t.index ["cart_id"], name: "index_orders_on_cart_id"
     t.index ["delivery_address_id"], name: "index_orders_on_delivery_address_id"
     t.index ["user_id"], name: "index_orders_on_user_id"
+    t.check_constraint "subtotal >= 0::numeric", name: "orders_subtotal_non_negative"
+    t.check_constraint "tax >= 0::numeric", name: "orders_tax_non_negative"
+    t.check_constraint "total >= 0::numeric", name: "orders_total_non_negative"
   end
 
   create_table "payments", force: :cascade do |t|
@@ -210,7 +218,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_095708) do
     t.datetime "updated_at", null: false
     t.index ["gateway", "gateway_order_id"], name: "index_payments_on_gateway_and_gateway_order_id", unique: true
     t.index ["gateway_order_id"], name: "index_payments_on_gateway_order_id"
-    t.index ["order_id"], name: "index_payments_on_order_id"
+    t.index ["order_id"], name: "index_payments_on_order_id", unique: true
+    t.check_constraint "amount > 0::numeric", name: "payments_amount_positive"
   end
 
   create_table "reservations", force: :cascade do |t|
