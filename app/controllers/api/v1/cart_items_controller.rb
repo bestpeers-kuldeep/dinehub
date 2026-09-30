@@ -24,8 +24,11 @@ module Api
       end
 
       def destroy
-        @cart_item.destroy
-        render json: { message: "Item removed from cart" }
+        @cart_item.destroy!
+
+        render json: { message: "Item removed from cart" }, status: :ok
+      rescue => e
+        render json: { error: e.message }, status: :unprocessable_entity
       end
 
       private
@@ -36,11 +39,18 @@ module Api
 
       def set_cart_item
         cart = current_user.carts.active.first
-        @cart_item = cart&.cart_items&.find(params[:id])
 
-        return if @cart_item
+        unless cart
+          render json: { error: "Active cart not found" }, status: :not_found
+          return
+        end
 
-        render json: { error: "Cart item not found" }, status: :not_found
+        @cart_item = cart.cart_items.find_by(id: params[:id])
+
+        unless @cart_item
+          render json: { error: "Cart item not found" }, status: :not_found
+          nil
+        end
       end
 
       def cart_item_params

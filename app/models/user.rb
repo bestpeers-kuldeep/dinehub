@@ -2,6 +2,7 @@ class User < ApplicationRecord
   RESET_PASSWORD_PERIOD = 1.hours
 
   has_secure_password
+  has_one_attached :profile_image
 
   normalizes :email, with: ->(email) { email.strip.downcase }
 
@@ -18,10 +19,16 @@ class User < ApplicationRecord
       id: id,
       first_name: first_name,
       last_name: last_name,
-      full_name: "#{first_name} #{last_name}",
+      full_name: full_name,
       email: email,
-      phone: phone
+      phone: phone,
+      additional_phone: additional_phone,
+      profile_image: profile_image.attached? ? Rails.application.routes.url_helpers.rails_blob_url(profile_image) : nil
     }
+  end
+
+  def full_name
+    "#{first_name} #{last_name}"
   end
 
   def send_reset_password_instructions

@@ -67,10 +67,21 @@ module Api
         render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
       end
 
+      def update_profile
+        current_user.update!(user_params)
+
+        render json: {
+          message: "Profile updated successfully",
+          user: current_user.as_public_json
+        }
+      rescue ActiveRecord::RecordInvalid => e
+        render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+      end
+
       private
 
       def user_params
-        permitted = %i[first_name last_name email phone password]
+        permitted = %i[first_name last_name email phone additional_phone password profile_image]
         if params[:user].present?
           params.require(:user).permit(permitted)
         else
