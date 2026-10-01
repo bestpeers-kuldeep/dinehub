@@ -5,9 +5,32 @@ class AddDatabaseConstraintsForCheckout < ActiveRecord::Migration[8.1]
   def change
     # --- orders ------------------------------------------------------------
     # Order belongs_to :cart is required at the model level; make the DB agree.
-    # NOTE: fails if legacy orders exist with cart_id IS NULL. Those rows are
-    # already un-updatable through Active Record (validation fails), so
-    # backfill or remove them before migrating.
+    # Orders created before cart_id existed have NULL. Give each its own
+    # completed, soft-deleted cart so this does not claim a user's live cart
+    # (the partial unique index below allows only one active cart per user).
+    # status 1 is Cart.statuses[:completed].
+    reversible do |dir|
+      dir.up do
+        execute <<~SQL
+          DO $$
+          DECLARE
+            rec record;
+            new_cart_id bigint;
+          BEGIN
+            FOR rec IN
+              SELECT id, user_id FROM orders WHERE cart_id IS NULL
+            LOOP
+              INSERT INTO carts (user_id, status, deleted_at, created_at, updated_at)
+              VALUES (rec.user_id, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+              RETURNING id INTO new_cart_id;
+
+              UPDATE orders SET cart_id = new_cart_id WHERE id = rec.id;
+            END LOOP;
+          END $$;
+        SQL
+      end
+    end
+
     change_column_null :orders, :cart_id, false
 
     add_check_constraint :orders, "subtotal >= 0", name: "orders_subtotal_non_negative"
