@@ -1,17 +1,14 @@
 module Orders
   class CreateOrderService
-    def initialize(user, cart_id)
+    def initialize(user, cart_id, delivery_address_id)
       @user = user
       @cart_id = cart_id
+      @delivery_address_id = delivery_address_id
     end
 
-    # Returns the open order for this cart. A second checkout while that order
-    # is still open returns the same row instead of creating another one.
     def call
       cart = @user.carts.find(@cart_id)
 
-      # Lock the cart for the whole snapshot. Cart item writes take the same
-      # lock, so quantities cannot change between the read and the insert.
       cart.with_lock do
         raise ActiveRecord::RecordNotFound unless cart.live?
 
@@ -25,10 +22,13 @@ module Orders
       cart_items = cart.cart_items.includes(:menu_item).to_a
       raise Errors::CartEmpty, "Cart is empty" if cart_items.empty?
 
+      delivery_address = @user.delivery_addresses.find(@delivery_address_id)
+
       subtotal = cart_items.sum { |item| item.quantity * item.unit_price }
 
       order = @user.orders.create!(
         cart: cart,
+        delivery_address: delivery_address,
         status: :pending,
         subtotal: subtotal,
         tax: 0,
@@ -44,6 +44,8 @@ module Orders
           total_price: cart_item.quantity * cart_item.unit_price
         )
       end
+
+      cart.update!(status: :completed)
 
       order
     end

@@ -1,7 +1,7 @@
 module Api
   module V1
     class OrdersController < BaseController
-      before_action :authenticate_user!
+      before_action :authenticate_user!, except: :payment_return
       before_action :set_order, only: %i[show]
 
       def index
@@ -30,7 +30,8 @@ module Api
       def create
         order = ::Orders::CreateOrderService.new(
           current_user,
-          order_params[:cart_id]
+          order_params[:cart_id],
+          order_params[:delivery_address_id]
         ).call
 
         render json: {
@@ -53,7 +54,7 @@ module Api
       private
 
       def order_params
-        params.permit(:cart_id)
+        params.permit(:cart_id, :delivery_address_id)
       end
 
       def set_order

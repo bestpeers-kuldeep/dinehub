@@ -25,6 +25,7 @@ Rails.application.routes.draw do
       resources :delivery_addresses
       resources :orders, only: %i[index show create] do
         resources :payments, only: :create
+        resource :delivery, only: :show
       end
       post "payments/cashfree/webhook", to: "payments/cashfree_webhooks#create"
       get "orders/:id/payment_return", to: "orders#payment_return"

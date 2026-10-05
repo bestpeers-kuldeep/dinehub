@@ -42,6 +42,7 @@ module Payments
             apply_transition(payment, payment_status, gateway_payment_id, payload)
           end
 
+          trigger_delivery_if_required(payment)
           payment
         end
 
@@ -79,8 +80,6 @@ module Payments
           )
 
           payment.order.update!(status: :completed)
-
-          complete_cart(payment.order.cart)
         end
 
         def mark_failed(payment, gateway_payment_id, payment_status, payload)
@@ -102,11 +101,6 @@ module Payments
         # Marks the cart that produced this order as consumed. Uses the order's
         # own cart rather than "any live cart for the user" so a cart the user
         # started after checkout is never wiped by a late webhook.
-        def complete_cart(cart)
-          return if cart.nil? || cart.deleted_at.present?
-
-          cart.update!(status: :completed, deleted_at: Time.current)
-        end
 
         def log_ignored(payment, payment_status, reason)
           Rails.logger.info(
@@ -142,6 +136,13 @@ module Payments
 
         def secret_key
           ENV.fetch("CASHFREE_SECRET_KEY")
+        end
+
+        def trigger_delivery_if_required(payment)
+          return unless payment.successful?
+          return if payment.order.delivery.present?
+
+          Deliveries::PlaceDeliveryService.new(payment.order).call
         end
       end
     end

@@ -33,7 +33,7 @@ module Payments
               customer_phone: @order.user.phone
             },
             order_meta: {
-              return_url: "#{ENV.fetch("APP_URL")}/orders/#{@order.id}/payment_return?order_id={order_id}"
+              return_url: "#{ENV.fetch("APP_URL")}/api/v1/orders/#{@order.id}/payment_return?order_id={order_id}"
             }
           }.to_json
 
