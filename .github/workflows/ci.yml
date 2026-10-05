@@ -96,6 +96,9 @@ jobs:
           API_URL: https://sandbox.cashfree.com/pg/orders
           CASHFREE_APP_ID: test
           CASHFREE_SECRET_KEY: test
+          RESTAURANT_ADDRESS: Block B, Sector 3, Noida, Uttar Pradesh 201301
+          RESTAURANT_NAME: FootCart
+          RESTAURANT_PHONE: 7988451542
           # RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
           # REDIS_URL: redis://localhost:6379/0
         run: |
