@@ -2,6 +2,7 @@ class Cart < ApplicationRecord
   belongs_to :user
   # A cart can produce another order after an earlier one is cancelled.
   has_many :orders
+  has_many :payments, dependent: :destroy
   has_many :cart_items, dependent: :destroy
 
   enum :status, { active: 0, completed: 1 }
@@ -15,5 +16,15 @@ class Cart < ApplicationRecord
 
   def live?
     active? && deleted_at.nil?
+  end
+
+  def checkout_in_progress?
+    payments.open_checkout.exists?
+  end
+
+  def ensure_editable!
+    return unless checkout_in_progress?
+
+    raise Orders::Errors::CartNotEditable, "Cart is checked out and cannot be changed"
   end
 end

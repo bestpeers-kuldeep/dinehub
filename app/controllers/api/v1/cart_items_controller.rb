@@ -70,9 +70,7 @@ module Api
       end
 
       def ensure_cart_editable!(cart)
-        return unless cart.orders.active.exists?
-
-        raise ::Orders::Errors::CartNotEditable, "Cart is checked out and cannot be changed"
+        cart.ensure_editable!
       end
 
       def render_errors(record)

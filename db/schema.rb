@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_30_142500) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_143000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -79,6 +79,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_142500) do
   create_table "deliveries", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "external_delivery_id"
+    t.string "external_order_id"
     t.jsonb "metadata"
     t.bigint "order_id", null: false
     t.string "provider"
@@ -206,16 +207,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_142500) do
 
   create_table "payments", force: :cascade do |t|
     t.decimal "amount", precision: 12, scale: 2, null: false
+    t.bigint "cart_id", null: false
     t.datetime "created_at", null: false
     t.string "currency", null: false
+    t.bigint "delivery_address_id"
     t.string "gateway", null: false
     t.string "gateway_order_id"
     t.string "gateway_payment_id"
     t.jsonb "metadata", default: {}, null: false
-    t.bigint "order_id", null: false
+    t.bigint "order_id"
     t.string "payment_session_id"
     t.integer "status", default: 0, null: false
     t.datetime "updated_at", null: false
+    t.index ["cart_id"], name: "index_payments_on_cart_id"
+    t.index ["cart_id"], name: "index_payments_one_open_checkout_per_cart", unique: true, where: "((order_id IS NULL) AND (status = ANY (ARRAY[0, 1])))"
+    t.index ["delivery_address_id"], name: "index_payments_on_delivery_address_id"
     t.index ["gateway", "gateway_order_id"], name: "index_payments_on_gateway_and_gateway_order_id", unique: true
     t.index ["gateway_order_id"], name: "index_payments_on_gateway_order_id"
     t.index ["order_id"], name: "index_payments_on_order_id", unique: true
@@ -289,6 +295,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_30_142500) do
   add_foreign_key "orders", "carts"
   add_foreign_key "orders", "delivery_addresses"
   add_foreign_key "orders", "users"
+  add_foreign_key "payments", "carts"
+  add_foreign_key "payments", "delivery_addresses"
   add_foreign_key "payments", "orders"
   add_foreign_key "reservations", "tables"
 end

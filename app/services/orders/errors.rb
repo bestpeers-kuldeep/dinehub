@@ -7,8 +7,10 @@ module Orders
     # Checkout was asked to snapshot a cart that has no items.
     class CartEmpty < Base; end
 
-    # The cart already has an open order, so its contents are frozen until that
-    # order is paid or cancelled.
+    # The cart already has an open checkout, so its contents are frozen until
+    # that payment succeeds or fails.
     class CartNotEditable < Base; end
+
+    class InvalidStatus < Base; end
   end
 end

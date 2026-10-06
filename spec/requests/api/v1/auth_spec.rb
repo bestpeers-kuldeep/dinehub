@@ -189,6 +189,42 @@ RSpec.describe "Auth API", type: :request do
     end
   end
 
+  path "/api/v1/profile" do
+    patch "Update the current user's profile" do
+      tags "Auth"
+      consumes "application/json"
+      produces "application/json"
+      security [ { BearerAuth: [] }, { CookieAuth: [] } ]
+      parameter name: :Authorization, in: :header, type: :string, required: false
+      parameter name: :profile, in: :body, schema: { "$ref" => "#/components/schemas/UpdateProfileRequest" }
+
+      response "200", "profile updated" do
+        let!(:account) { create(:user) }
+        let(:Authorization) { "Bearer #{JsonWebToken.encode({ user_id: account.id })}" }
+        let(:profile) { { first_name: "Sam" } }
+
+        run_test! do |response|
+          body = JSON.parse(response.body)
+          expect(body["message"]).to eq("Profile updated successfully")
+          expect(body.dig("user", "first_name")).to eq("Sam")
+        end
+      end
+
+      response "422", "validation failed" do
+        let!(:account) { create(:user) }
+        let(:Authorization) { "Bearer #{JsonWebToken.encode({ user_id: account.id })}" }
+        let(:profile) { { first_name: "" } }
+        run_test!
+      end
+
+      response "401", "unauthorized" do
+        let(:Authorization) { nil }
+        let(:profile) { { first_name: "Sam" } }
+        run_test!
+      end
+    end
+  end
+
   it "registers a user nested under user" do
     post "/api/v1/auth/register", params: { user: registration_attributes }, as: :json
 

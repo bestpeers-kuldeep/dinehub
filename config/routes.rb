@@ -23,11 +23,15 @@ Rails.application.routes.draw do
         resources :items, controller: "cart_items", only: [ :create, :update, :destroy ]
       end
       resources :delivery_addresses
-      resources :orders, only: %i[index show create] do
-        resources :payments, only: :create
+      resources :orders, only: %i[index show update] do
+        resource :delivery, only: :show
+      end
+      resources :payments, only: :create do
+        collection do
+          get :payment_return
+        end
       end
       post "payments/cashfree/webhook", to: "payments/cashfree_webhooks#create"
-      get "orders/:id/payment_return", to: "orders#payment_return"
       get "specials", to: "specials#index"
 
       post "auth/register", to: "auth#register"

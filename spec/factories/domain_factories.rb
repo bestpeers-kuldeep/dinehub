@@ -145,6 +145,13 @@ FactoryBot.define do
     status { :active }
   end
 
+  factory :cart_item do
+    cart
+    menu_item
+    quantity { 1 }
+    unit_price { 8.50 }
+  end
+
   factory :order do
     user
     cart { association :cart, user: user }
@@ -155,13 +162,19 @@ FactoryBot.define do
   end
 
   factory :payment do
-    order
+    order { nil }
+    cart
+    delivery_address { nil }
     gateway { "cashfree" }
     amount { 20.00 }
     currency { "INR" }
     status { :pending }
-    sequence(:gateway_order_id) { |n| "ORDER_#{n}" }
+    sequence(:gateway_order_id) { |n| "CHECKOUT_#{n}" }
     metadata { {} }
+
+    after(:build) do |payment|
+      payment.cart = payment.order.cart if payment.order.present?
+    end
   end
 
   factory :delivery_address do
