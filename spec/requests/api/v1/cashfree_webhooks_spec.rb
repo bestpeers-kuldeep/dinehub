@@ -1,6 +1,80 @@
-require "rails_helper"
+require "swagger_helper"
 
 RSpec.describe "Cashfree payment webhook", type: :request do
+  path "/api/v1/payments/cashfree/webhook" do
+    post "Cashfree payment result" do
+      tags "Payments"
+      consumes "application/json"
+      produces "application/json"
+      parameter name: "x-webhook-signature", in: :header, type: :string, required: true
+      parameter name: "x-webhook-timestamp", in: :header, type: :string, required: true
+      parameter name: :payload, in: :body, schema: { "$ref" => "#/components/schemas/CashfreeWebhook" }
+
+      response "401", "invalid signature" do
+        let(:"x-webhook-signature") { "invalid" }
+        let(:"x-webhook-timestamp") { Time.current.to_i.to_s }
+        let(:payload) do
+          {
+            type: "PAYMENT_SUCCESS_WEBHOOK",
+            data: {
+              order: { order_id: "CHECKOUT_UNKNOWN", order_amount: 20.0 },
+              payment: { cf_payment_id: 1, payment_status: "SUCCESS" }
+            }
+          }
+        end
+
+        before do
+          allow(ENV).to receive(:fetch).and_call_original
+          allow(ENV).to receive(:fetch).with("CASHFREE_SECRET_KEY").and_return("test-webhook-secret")
+        end
+
+        run_test!
+      end
+
+      response "400", "order id is missing" do
+        let(:"x-webhook-timestamp") { timestamp }
+        let(:payload) { { data: { payment: { payment_status: "SUCCESS" } } } }
+        let(:"x-webhook-signature") { sign(payload.to_json) }
+
+        run_test!
+      end
+
+      response "404", "payment not found" do
+        let(:"x-webhook-timestamp") { timestamp }
+        let(:payload) do
+          {
+            data: {
+              order: { order_id: "ORDER_UNKNOWN" },
+              payment: { payment_status: "SUCCESS" }
+            }
+          }
+        end
+        let(:"x-webhook-signature") { sign(payload.to_json) }
+
+        run_test!
+      end
+
+      response "200", "payment applied and order created" do
+        let(:"x-webhook-timestamp") { timestamp }
+        let(:payload) do
+          {
+            type: "PAYMENT_SUCCESS_WEBHOOK",
+            data: {
+              order: { order_id: payment.gateway_order_id, order_amount: 20.0 },
+              payment: { cf_payment_id: 987_654, payment_status: "SUCCESS" }
+            }
+          }
+        end
+        let(:"x-webhook-signature") { sign(payload.to_json) }
+
+        run_test! do
+          expect(payment.reload).to be_successful
+          expect(payment.order).to be_confirmed
+        end
+      end
+    end
+  end
+
   let(:secret) { "test-webhook-secret" }
   let(:timestamp) { Time.current.to_i.to_s }
   let(:user) { create(:user) }

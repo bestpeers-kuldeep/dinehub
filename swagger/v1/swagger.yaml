@@ -20,6 +20,11 @@ tags:
 - name: Reservations
 - name: Careers
 - name: Auth
+- name: Cart
+- name: Delivery addresses
+- name: Orders
+- name: Deliveries
+- name: Payments
 components:
   securitySchemes:
     BearerAuth:
@@ -520,6 +525,341 @@ components:
           type: string
         user:
           "$ref": "#/components/schemas/User"
+    UpdateProfileRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        additional_phone:
+          type: string
+          nullable: true
+        password:
+          type: string
+          format: password
+    OrderStatus:
+      type: string
+      enum:
+      - pending
+      - confirmed
+      - preparing
+      - ready
+      - completed
+      - cancelled
+    PaymentStatus:
+      type: string
+      enum:
+      - pending
+      - processing
+      - successful
+      - failed
+      - cancelled
+    DeliveryStatus:
+      type: string
+      enum:
+      - pending
+      - requested
+      - assigned
+      - picked_up
+      - out_for_delivery
+      - delivered
+      - cancelled
+      - failed
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        cart_id:
+          type: integer
+        menu_item_id:
+          type: integer
+        quantity:
+          type: integer
+        unit_price:
+          type: string
+          example: '8.50'
+        menu_item:
+          "$ref": "#/components/schemas/MenuItem"
+    Cart:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        status:
+          type: string
+          enum:
+          - active
+          - completed
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        cart_items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/CartItem"
+    CartItemsRequest:
+      type: object
+      required:
+      - cart_items
+      properties:
+        cart_items:
+          type: array
+          items:
+            type: object
+            required:
+            - menu_item_id
+            - quantity
+            properties:
+              menu_item_id:
+                type: integer
+              quantity:
+                type: integer
+    CartItemUpdateRequest:
+      type: object
+      required:
+      - cart_item
+      properties:
+        cart_item:
+          type: object
+          required:
+          - quantity
+          properties:
+            quantity:
+              type: integer
+    DeliveryAddress:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        address_line:
+          type: string
+        landmark:
+          type: string
+          nullable: true
+        city:
+          type: string
+        state:
+          type: string
+        postal_code:
+          type: string
+        latitude:
+          type: string
+          nullable: true
+        longitude:
+          type: string
+          nullable: true
+        is_default:
+          type: boolean
+    DeliveryAddressRequest:
+      type: object
+      required:
+      - delivery_address
+      properties:
+        delivery_address:
+          type: object
+          required:
+          - address_line
+          - city
+          - state
+          - postal_code
+          properties:
+            address_line:
+              type: string
+            landmark:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            postal_code:
+              type: string
+            latitude:
+              type: number
+            longitude:
+              type: number
+            is_default:
+              type: boolean
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        order_id:
+          type: integer
+        menu_item_id:
+          type: integer
+        name:
+          type: string
+        quantity:
+          type: integer
+        unit_price:
+          type: string
+        total_price:
+          type: string
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+        order_id:
+          type: integer
+          nullable: true
+        cart_id:
+          type: integer
+        delivery_address_id:
+          type: integer
+          nullable: true
+        gateway:
+          type: string
+          example: cashfree
+        amount:
+          type: string
+          example: '20.0'
+        currency:
+          type: string
+          example: INR
+        status:
+          "$ref": "#/components/schemas/PaymentStatus"
+        payment_session_id:
+          type: string
+          nullable: true
+        gateway_order_id:
+          type: string
+          nullable: true
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        cart_id:
+          type: integer
+        delivery_address_id:
+          type: integer
+          nullable: true
+        status:
+          "$ref": "#/components/schemas/OrderStatus"
+        subtotal:
+          type: string
+        tax:
+          type: string
+        total:
+          type: string
+        order_items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/OrderItem"
+        payment:
+          "$ref": "#/components/schemas/Payment"
+    OrderStatusRequest:
+      type: object
+      required:
+      - status
+      properties:
+        status:
+          "$ref": "#/components/schemas/OrderStatus"
+    Delivery:
+      type: object
+      properties:
+        id:
+          type: integer
+        order_id:
+          type: integer
+        provider:
+          type: string
+          nullable: true
+        status:
+          "$ref": "#/components/schemas/DeliveryStatus"
+        tracking_url:
+          type: string
+          nullable: true
+        external_order_id:
+          type: string
+          nullable: true
+    CheckoutRequest:
+      type: object
+      required:
+      - cart_id
+      - delivery_address_id
+      properties:
+        cart_id:
+          type: integer
+        delivery_address_id:
+          type: integer
+    CheckoutResponse:
+      type: object
+      properties:
+        payment:
+          type: object
+          properties:
+            id:
+              type: integer
+            gateway:
+              type: string
+            amount:
+              type: string
+            currency:
+              type: string
+            status:
+              "$ref": "#/components/schemas/PaymentStatus"
+            payment_session_id:
+              type: string
+              nullable: true
+    PaymentReturn:
+      type: object
+      properties:
+        message:
+          type: string
+        order_id:
+          type: integer
+          nullable: true
+        gateway_order_id:
+          type: string
+    CashfreeWebhook:
+      type: object
+      properties:
+        type:
+          type: string
+          example: PAYMENT_SUCCESS_WEBHOOK
+        data:
+          type: object
+          properties:
+            order:
+              type: object
+              properties:
+                order_id:
+                  type: string
+                  description: Gateway order id stored on the payment, for example
+                    CHECKOUT_1
+                order_amount:
+                  type: number
+            payment:
+              type: object
+              properties:
+                cf_payment_id:
+                  type: integer
+                payment_status:
+                  type: string
+                  enum:
+                  - SUCCESS
+                  - FAILED
+                  - USER_DROPPED
+                  - CANCELLED
+                  - VOID
+                  - PENDING
+                  - NOT_ATTEMPTED
   responses:
     NotFound:
       description: Record not found
@@ -635,6 +975,32 @@ paths:
           application/json:
             schema:
               "$ref": "#/components/schemas/ResetPasswordRequest"
+  "/api/v1/profile":
+    patch:
+      summary: Update the current user's profile
+      tags:
+      - Auth
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: profile updated
+        '422':
+          description: validation failed
+        '401':
+          description: unauthorized
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UpdateProfileRequest"
   "/api/v1/careers":
     post:
       summary: Submit a job application
@@ -651,6 +1017,161 @@ paths:
           application/json:
             schema:
               "$ref": "#/components/schemas/CareerRequest"
+  "/api/v1/cart":
+    get:
+      summary: Get the current cart
+      tags:
+      - Cart
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: cart returned
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Cart"
+        '401':
+          description: unauthorized
+    delete:
+      summary: Clear the current cart
+      tags:
+      - Cart
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: cart cleared
+        '422':
+          description: cart is checked out
+        '401':
+          description: unauthorized
+  "/api/v1/cart/items":
+    post:
+      summary: Add items to the cart
+      tags:
+      - Cart
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '201':
+          description: items added
+        '404':
+          description: menu item not found
+        '422':
+          description: cart is checked out
+        '401':
+          description: unauthorized
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CartItemsRequest"
+  "/api/v1/cart/items/{id}":
+    patch:
+      summary: Update a cart item quantity
+      tags:
+      - Cart
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: quantity updated
+        '422':
+          description: quantity is invalid
+        '404':
+          description: cart item not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CartItemUpdateRequest"
+    delete:
+      summary: Remove a cart item
+      tags:
+      - Cart
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: item removed
+        '404':
+          description: cart item not found
+  "/api/v1/payments/cashfree/webhook":
+    post:
+      summary: Cashfree payment result
+      tags:
+      - Payments
+      parameters:
+      - name: x-webhook-signature
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: x-webhook-timestamp
+        in: header
+        required: true
+        schema:
+          type: string
+      responses:
+        '401':
+          description: invalid signature
+        '400':
+          description: order id is missing
+        '404':
+          description: payment not found
+        '200':
+          description: payment applied and order created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CashfreeWebhook"
   "/api/v1/menus":
     get:
       summary: List menus
@@ -777,6 +1298,166 @@ paths:
       responses:
         '200':
           description: specials returned
+  "/api/v1/payments":
+    post:
+      summary: Start checkout from the cart
+      tags:
+      - Payments
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: payment session created
+        '422':
+          description: cart is empty
+        '404':
+          description: cart or delivery address not found
+        '401':
+          description: unauthorized
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CheckoutRequest"
+  "/api/v1/payments/payment_return":
+    get:
+      summary: Cashfree return URL after the customer pays
+      tags:
+      - Payments
+      parameters:
+      - name: order_id
+        in: query
+        required: false
+        description: Cashfree gateway order id
+        schema:
+          type: string
+      responses:
+        '200':
+          description: payment flow completed
+  "/api/v1/delivery_addresses":
+    get:
+      summary: List delivery addresses
+      tags:
+      - Delivery addresses
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: addresses returned
+        '401':
+          description: unauthorized
+    post:
+      summary: Create a delivery address
+      tags:
+      - Delivery addresses
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '201':
+          description: address created
+        '422':
+          description: validation failed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/DeliveryAddressRequest"
+  "/api/v1/delivery_addresses/{id}":
+    get:
+      summary: Get a delivery address
+      tags:
+      - Delivery addresses
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: address returned
+        '404':
+          description: address not found
+    patch:
+      summary: Update a delivery address
+      tags:
+      - Delivery addresses
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: address updated
+        '422':
+          description: validation failed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/DeliveryAddressRequest"
+    delete:
+      summary: Delete a delivery address
+      tags:
+      - Delivery addresses
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: address deleted
+        '404':
+          description: address not found
   "/api/v1/parties_reservations":
     post:
       summary: Create a parties inquiry
@@ -809,6 +1490,103 @@ paths:
           application/json:
             schema:
               "$ref": "#/components/schemas/InquiryReservationRequest"
+  "/api/v1/orders":
+    get:
+      summary: List orders
+      tags:
+      - Orders
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: orders returned
+        '401':
+          description: unauthorized
+  "/api/v1/orders/{id}":
+    get:
+      summary: Get an order
+      tags:
+      - Orders
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: order returned
+        '404':
+          description: order not found
+    patch:
+      summary: Update order status
+      tags:
+      - Orders
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: status updated
+        '422':
+          description: status change is not allowed
+        '404':
+          description: order not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/OrderStatusRequest"
+  "/api/v1/orders/{order_id}/delivery":
+    get:
+      summary: Get the delivery for an order
+      tags:
+      - Deliveries
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: delivery returned
+        '404':
+          description: order not found
   "/api/v1/reservations":
     post:
       summary: Create a dining table reservation

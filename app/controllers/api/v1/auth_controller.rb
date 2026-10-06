@@ -1,7 +1,7 @@
 module Api
   module V1
     class AuthController < BaseController
-      before_action :authenticate_user!, only: :me
+      before_action :authenticate_user!, only: %i[me update_profile]
 
       def register
         user = User.create!(user_params)
