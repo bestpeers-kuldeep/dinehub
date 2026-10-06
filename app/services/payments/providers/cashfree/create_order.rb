@@ -10,12 +10,13 @@ module Payments
         API_URL = ENV.fetch("API_URL")
         API_VERSION = "2025-01-01"
 
-        def initialize(order)
-          @order = order
+        def initialize(payment)
+          @payment = payment
         end
 
         def call
           uri = URI(API_URL)
+          user = @payment.cart.user
 
           request = Net::HTTP::Post.new(uri)
           request["x-client-id"] = ENV.fetch("CASHFREE_APP_ID")
@@ -25,15 +26,15 @@ module Payments
           request["Accept"] = "application/json"
 
           request.body = {
-            order_id: "ORDER_#{@order.id}",
-            order_amount: @order.total.to_f,
-            order_currency: "INR",
+            order_id: "CHECKOUT_#{@payment.id}",
+            order_amount: @payment.amount.to_f,
+            order_currency: @payment.currency,
             customer_details: {
-              customer_id: @order.user_id.to_s,
-              customer_phone: @order.user.phone
+              customer_id: user.id.to_s,
+              customer_phone: user.phone
             },
             order_meta: {
-              return_url: "#{ENV.fetch("APP_URL")}/api/v1/orders/#{@order.id}/payment_return?order_id={order_id}"
+              return_url: "#{ENV.fetch("APP_URL")}/api/v1/payments/payment_return?order_id={order_id}"
             }
           }.to_json
 

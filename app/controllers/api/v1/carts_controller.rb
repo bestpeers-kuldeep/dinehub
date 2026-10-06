@@ -21,10 +21,7 @@ module Api
         return render json: { message: "Cart is already empty" } unless cart
 
         cart.with_lock do
-          if cart.orders.active.exists?
-            raise ::Orders::Errors::CartNotEditable, "Cart is checked out and cannot be cleared"
-          end
-
+          cart.ensure_editable!
           cart.update!(deleted_at: Time.current)
         end
 

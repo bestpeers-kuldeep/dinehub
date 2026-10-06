@@ -5,13 +5,23 @@ require "json"
 module Payments
   module Providers
     module Cashfree
-      # Verifies a Cashfree payment webhook and moves the payment/order to a
-      # terminal state. Safe to call multiple times for the same event:
+      # Verifies a Cashfree payment webhook. A finished payment (success or
+      # failure) creates the order from the checkout snapshot. Success also
+      # soft-deletes the cart. Safe to call multiple times for the same event:
       # Cashfree retries webhooks, so all state checks happen under a row lock.
       class PaymentVerify
         GATEWAY = "cashfree".freeze
-        SUCCESS_STATUSES = %w[SUCCESS].freeze
-        FAILURE_STATUSES = %w[FAILED USER_DROPPED].freeze
+        # Cashfree payment_status values, mapped onto Payment#status.
+        # Finished payments create an order. A successful payment is never moved again.
+        STATUS_FOR = {
+          "SUCCESS" => :successful,
+          "FAILED" => :failed,
+          "USER_DROPPED" => :failed,
+          "CANCELLED" => :cancelled,
+          "VOID" => :cancelled,
+          "PENDING" => :pending,
+          "NOT_ATTEMPTED" => :pending
+        }.freeze
 
         def initialize(raw_body:, signature:, timestamp:)
           @raw_body = raw_body.to_s
@@ -33,10 +43,10 @@ module Payments
 
           payment = Payment.find_by!(gateway: GATEWAY, gateway_order_id: gateway_order_id)
 
-          # Lock order first, then payment. CreatePaymentService uses the same
-          # order -> payment locking sequence, which avoids deadlocks between a
+          # Lock the cart first, then the payment. CreatePaymentService uses the
+          # same cart -> payment sequence, which avoids deadlocks between a
           # checkout retry and an in-flight webhook.
-          payment.order.with_lock do
+          payment.cart.with_lock do
             payment.lock!
 
             apply_transition(payment, payment_status, gateway_payment_id, payload)
@@ -55,52 +65,70 @@ module Payments
             return
           end
 
-          case payment_status
-          when *SUCCESS_STATUSES
-            # A SUCCESS may legitimately arrive after a FAILED/USER_DROPPED for
-            # an earlier attempt on the same gateway order, so failed -> successful
-            # is allowed; the customer has been charged and must get their order.
-            mark_successful(payment, gateway_payment_id, payload)
-          when *FAILURE_STATUSES
-            if payment.failed?
-              log_ignored(payment, payment_status, "payment already failed")
-            else
-              mark_failed(payment, gateway_payment_id, payment_status, payload)
-            end
-          else
+          target = STATUS_FOR[payment_status]
+          if target.nil?
             log_ignored(payment, payment_status, "unhandled payment_status")
+            return
           end
+
+          if target == :successful
+            # A SUCCESS may arrive after FAILED/USER_DROPPED on the same gateway
+            # order. The customer has been charged and must get their order.
+            mark_successful(payment, gateway_payment_id, payload)
+            return
+          end
+
+          # Pending must not reopen a failed or cancelled checkout.
+          if target == :pending && !payment.pending? && !payment.processing?
+            log_ignored(payment, payment_status, "payment already #{payment.status}")
+            return
+          end
+
+          if %i[failed cancelled].include?(target)
+            if payment.status == target.to_s && payment.order.present?
+              log_ignored(payment, payment_status, "payment already #{payment.status}")
+              return
+            end
+
+            mark_unpaid(payment, target, gateway_payment_id, payment_status, payload)
+            return
+          end
+
+          update_status(payment, target, gateway_payment_id, payment_status, payload)
         end
 
         def mark_successful(payment, gateway_payment_id, payload)
+          order = Orders::CreateOrderService.new(payment, status: :confirmed).call
+
           payment.update!(
+            order: order,
             gateway_payment_id: gateway_payment_id,
             status: :successful,
             metadata: payment.metadata.merge("webhook" => payload)
           )
-
-          payment.order.update!(status: :completed)
         end
 
-        def mark_failed(payment, gateway_payment_id, payment_status, payload)
-          payment.update!(
-            gateway_payment_id: gateway_payment_id,
-            status: :failed,
-            metadata: payment.metadata.merge(
-              "webhook" => payload,
-              "final_payment_status" => payment_status
-            )
+        def mark_unpaid(payment, status, gateway_payment_id, payment_status, payload)
+          order = Orders::CreateOrderService.new(payment, status: :cancelled).call
+          metadata = payment.metadata.merge(
+            "webhook" => payload,
+            "final_payment_status" => payment_status
           )
+          attributes = { order: order, status: status, metadata: metadata }
+          attributes[:gateway_payment_id] = gateway_payment_id if gateway_payment_id.present?
 
-          payment.order.update!(status: :cancelled)
-
-          # The cart is deliberately left untouched on failure so the customer
-          # can retry checkout without rebuilding it.
+          payment.update!(attributes)
         end
 
-        # Marks the cart that produced this order as consumed. Uses the order's
-        # own cart rather than "any live cart for the user" so a cart the user
-        # started after checkout is never wiped by a late webhook.
+        def update_status(payment, status, gateway_payment_id, payment_status, payload)
+          metadata = payment.metadata.merge("webhook" => payload)
+          metadata["final_payment_status"] = payment_status unless status == :pending
+
+          attributes = { status: status, metadata: metadata }
+          attributes[:gateway_payment_id] = gateway_payment_id if gateway_payment_id.present?
+
+          payment.update!(attributes)
+        end
 
         def log_ignored(payment, payment_status, reason)
           Rails.logger.info(
@@ -140,6 +168,7 @@ module Payments
 
         def trigger_delivery_if_required(payment)
           return unless payment.successful?
+          return if payment.order.blank? || payment.order.delivery_address.blank?
           return if payment.order.delivery.present?
 
           Deliveries::PlaceDeliveryService.new(payment.order).call

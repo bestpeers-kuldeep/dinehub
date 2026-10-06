@@ -1,12 +1,11 @@
 module Api
   module V1
     class OrdersController < BaseController
-      before_action :authenticate_user!, except: :payment_return
-      before_action :set_order, only: %i[show]
+      before_action :authenticate_user!
+      before_action :set_order, only: %i[show update]
 
       def index
         orders = current_user.orders
-                         .active
                          .includes(:order_items, :payment)
                          .order(created_at: :desc)
 
@@ -27,35 +26,20 @@ module Api
         )
       end
 
-      def create
-        order = ::Orders::CreateOrderService.new(
-          current_user,
-          order_params[:cart_id],
-          order_params[:delivery_address_id]
-        ).call
+      def update
+        ::Orders::UpdateStatus.new(@order, params.require(:status)).call
 
-        render json: {
-          order: order.as_json(
-            include: :order_items
-          )
-        }, status: :created
-      rescue StandardError => e
+        render json: @order.as_json(
+          include: {
+            order_items: {},
+            payment: {}
+          }
+        )
+      rescue ::Orders::Errors::InvalidStatus, ActionController::ParameterMissing => e
         render json: { error: e.message }, status: :unprocessable_entity
       end
 
-      def payment_return
-        render json: {
-          message: "Payment flow completed",
-          order_id: params[:id],
-          gateway_order_id: params[:order_id]
-        }
-      end
-
       private
-
-      def order_params
-        params.permit(:cart_id, :delivery_address_id)
-      end
 
       def set_order
         @order = current_user.orders.find(params[:id])

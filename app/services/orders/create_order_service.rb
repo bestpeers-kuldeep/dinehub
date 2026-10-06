@@ -1,53 +1,56 @@
 module Orders
+  # Builds the order from the checkout snapshot once Cashfree reports a
+  # finished payment. Success confirms the order and soft-deletes the cart.
+  # Failure records a cancelled order and leaves the cart so the customer
+  # can pay again.
   class CreateOrderService
-    def initialize(user, cart_id, delivery_address_id)
-      @user = user
-      @cart_id = cart_id
-      @delivery_address_id = delivery_address_id
+    def initialize(payment, status:)
+      @payment = payment
+      @status = status.to_sym
     end
 
     def call
-      cart = @user.carts.find(@cart_id)
-
-      cart.with_lock do
-        raise ActiveRecord::RecordNotFound unless cart.live?
-
-        cart.orders.active.order(created_at: :desc).first || create_order(cart)
-      end
+      order = @payment.order || create_order
+      order.update!(status: @status) if order.status != @status.to_s
+      clear_cart(@payment.cart) if @status == :confirmed
+      order
     end
 
     private
 
-    def create_order(cart)
-      cart_items = cart.cart_items.includes(:menu_item).to_a
-      raise Errors::CartEmpty, "Cart is empty" if cart_items.empty?
+    def create_order
+      checkout = @payment.metadata.fetch("checkout")
+      cart = @payment.cart
 
-      delivery_address = @user.delivery_addresses.find(@delivery_address_id)
-
-      subtotal = cart_items.sum { |item| item.quantity * item.unit_price }
-
-      order = @user.orders.create!(
+      order = cart.user.orders.create!(
         cart: cart,
-        delivery_address: delivery_address,
-        status: :pending,
-        subtotal: subtotal,
-        tax: 0,
-        total: subtotal
+        delivery_address: @payment.delivery_address,
+        status: @status,
+        subtotal: checkout.fetch("subtotal"),
+        tax: checkout.fetch("tax"),
+        total: checkout.fetch("total")
       )
 
-      cart_items.each do |cart_item|
+      Array(checkout.fetch("items")).each do |item|
+        quantity = item.fetch("quantity").to_i
+        unit_price = item.fetch("unit_price").to_d
+
         order.order_items.create!(
-          menu_item: cart_item.menu_item,
-          name: cart_item.menu_item.name,
-          quantity: cart_item.quantity,
-          unit_price: cart_item.unit_price,
-          total_price: cart_item.quantity * cart_item.unit_price
+          menu_item_id: item.fetch("menu_item_id"),
+          name: item.fetch("name"),
+          quantity: quantity,
+          unit_price: unit_price,
+          total_price: quantity * unit_price
         )
       end
 
-      cart.update!(status: :completed)
-
       order
+    end
+
+    def clear_cart(cart)
+      return if cart.deleted_at.present?
+
+      cart.update!(status: :completed, deleted_at: Time.current)
     end
   end
 end

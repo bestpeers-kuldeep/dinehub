@@ -13,7 +13,7 @@ module Payments
     # Upstream gateway (Cashfree) returned an error or was unreachable -> 502
     class Gateway < Base; end
 
-    # Order is in a state that cannot accept a payment -> 422
-    class OrderNotPayable < Base; end
+    # A Cashfree session is already open for this cart -> 422
+    class CheckoutInProgress < Base; end
   end
 end

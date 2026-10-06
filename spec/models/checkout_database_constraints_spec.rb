@@ -36,8 +36,26 @@ RSpec.describe "Checkout database constraints", type: :model do
 
       expect_violation(ActiveRecord::RecordNotUnique) do
         Payment.insert_all!([ {
-          order_id: order.id, gateway: "cashfree", amount: 1, currency: "INR", status: 0,
+          order_id: order.id, cart_id: order.cart_id, gateway: "cashfree", amount: 1, currency: "INR", status: 0,
           gateway_order_id: "ORDER_dup", metadata: {}
+        } ])
+      end
+    end
+
+    it "allows a checkout payment before an order exists" do
+      cart = create(:cart, user: user)
+
+      expect { create(:payment, cart: cart, order: nil) }.not_to raise_error
+    end
+
+    it "allows only one open checkout per cart" do
+      cart = create(:cart, user: user)
+      create(:payment, cart: cart, order: nil, status: :pending)
+
+      expect_violation(ActiveRecord::RecordNotUnique) do
+        Payment.insert_all!([ {
+          cart_id: cart.id, order_id: nil, gateway: "cashfree", amount: 1, currency: "INR", status: 0,
+          gateway_order_id: "CHECKOUT_dup", metadata: {}
         } ])
       end
     end
