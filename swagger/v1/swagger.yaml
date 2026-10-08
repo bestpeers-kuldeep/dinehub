@@ -6,6 +6,8 @@ info:
   description: |
     Restaurant public API. Use **Try it out** to call endpoints against this server.
 
+    Admin endpoints require a user with the admin role. Send the JWT as a Bearer token or the `jwt` cookie.
+
     Table reservations hold a 2-hour dining window. Arrival times must be on a 30-minute slot (e.g. `18:00`, `18:30`).
 servers:
 - url: "/"
@@ -25,6 +27,12 @@ tags:
 - name: Orders
 - name: Deliveries
 - name: Payments
+- name: Admin menus
+- name: Admin menu categories
+- name: Admin menu items
+- name: Admin customers
+- name: Admin orders
+- name: Admin catering
 components:
   securitySchemes:
     BearerAuth:
@@ -429,6 +437,10 @@ components:
           type: string
         resume_link:
           type: string
+        job_id:
+          type: integer
+          nullable: true
+          description: Optional job this application belongs to
     Career:
       type: object
       properties:
@@ -505,6 +517,11 @@ components:
         password_confirmation:
           type: string
           format: password
+    UserRole:
+      type: string
+      enum:
+      - customer
+      - admin
     User:
       type: object
       properties:
@@ -514,10 +531,20 @@ components:
           type: string
         last_name:
           type: string
+        full_name:
+          type: string
         email:
           type: string
         phone:
           type: string
+        additional_phone:
+          type: string
+          nullable: true
+        role:
+          "$ref": "#/components/schemas/UserRole"
+        profile_image:
+          type: string
+          nullable: true
     AuthResponse:
       type: object
       properties:
@@ -770,6 +797,151 @@ components:
       properties:
         status:
           "$ref": "#/components/schemas/OrderStatus"
+    AdminMenuRequest:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+        category_type:
+          "$ref": "#/components/schemas/MenuCategoryType"
+    AdminMenuCategoryRequest:
+      type: object
+      required:
+      - name
+      - menu_id
+      properties:
+        name:
+          type: string
+        menu_id:
+          type: integer
+        drink_type:
+          nullable: true
+          allOf:
+          - "$ref": "#/components/schemas/DrinkType"
+    AdminMenuItemRequest:
+      type: object
+      required:
+      - name
+      - price
+      - menu_category_id
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          example: 8.5
+        menu_category_id:
+          type: integer
+        start_at:
+          type: string
+          format: date-time
+          nullable: true
+        end_at:
+          type: string
+          format: date-time
+          nullable: true
+        image_url:
+          type: string
+          nullable: true
+    AdminCustomerRequest:
+      type: object
+      required:
+      - first_name
+      - last_name
+      - email
+      - phone
+      - password
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        additional_phone:
+          type: string
+          nullable: true
+        password:
+          type: string
+          format: password
+          description: Required when creating a customer. Omit it on update to keep
+            the current password.
+    AdminOrderUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        role:
+          "$ref": "#/components/schemas/UserRole"
+    AdminOrderPayment:
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: integer
+        amount:
+          type: string
+        currency:
+          type: string
+        gateway:
+          type: string
+        status:
+          "$ref": "#/components/schemas/PaymentStatus"
+        gateway_order_id:
+          type: string
+          nullable: true
+        gateway_payment_id:
+          type: string
+          nullable: true
+    AdminOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        cart_id:
+          type: integer
+        delivery_address_id:
+          type: integer
+          nullable: true
+        status:
+          "$ref": "#/components/schemas/OrderStatus"
+        subtotal:
+          type: string
+        tax:
+          type: string
+        total:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        order_items:
+          type: array
+          items:
+            "$ref": "#/components/schemas/OrderItem"
+        payment:
+          "$ref": "#/components/schemas/AdminOrderPayment"
+        user:
+          "$ref": "#/components/schemas/AdminOrderUser"
     Delivery:
       type: object
       properties:
@@ -882,6 +1054,672 @@ components:
           schema:
             "$ref": "#/components/schemas/Error"
 paths:
+  "/api/v1/admin/menus":
+    get:
+      summary: List menus
+      tags:
+      - Admin menus
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: menus returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Menu"
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+    post:
+      summary: Create a menu
+      tags:
+      - Admin menus
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '201':
+          description: menu created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Menu"
+        '422':
+          description: validation failed
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AdminMenuRequest"
+  "/api/v1/admin/menus/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get a menu
+      tags:
+      - Admin menus
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: menu returned
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Menu"
+        '404':
+          description: menu not found
+    patch:
+      summary: Update a menu
+      tags:
+      - Admin menus
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: menu updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Menu"
+        '422':
+          description: validation failed
+        '404':
+          description: menu not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AdminMenuRequest"
+    delete:
+      summary: Delete a menu
+      tags:
+      - Admin menus
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '204':
+          description: menu deleted
+        '404':
+          description: menu not found
+  "/api/v1/admin/menu_categories":
+    get:
+      summary: List menu categories
+      tags:
+      - Admin menu categories
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: menu_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: categories returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/MenuCategory"
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+    post:
+      summary: Create a menu category
+      tags:
+      - Admin menu categories
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '201':
+          description: category created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MenuCategory"
+        '422':
+          description: validation failed
+        '403':
+          description: forbidden
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AdminMenuCategoryRequest"
+  "/api/v1/admin/menu_categories/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get a menu category
+      tags:
+      - Admin menu categories
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: category returned
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MenuCategory"
+        '404':
+          description: category not found
+    patch:
+      summary: Update a menu category
+      tags:
+      - Admin menu categories
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: category updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MenuCategory"
+        '422':
+          description: validation failed
+        '404':
+          description: category not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AdminMenuCategoryRequest"
+    delete:
+      summary: Delete a menu category
+      tags:
+      - Admin menu categories
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '204':
+          description: category deleted
+        '404':
+          description: category not found
+  "/api/v1/admin/menu_items":
+    get:
+      summary: List menu items
+      tags:
+      - Admin menu items
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: menu_category_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: items returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/MenuItem"
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+    post:
+      summary: Create a menu item
+      tags:
+      - Admin menu items
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '201':
+          description: item created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MenuItem"
+        '422':
+          description: validation failed
+        '403':
+          description: forbidden
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AdminMenuItemRequest"
+  "/api/v1/admin/menu_items/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get a menu item
+      tags:
+      - Admin menu items
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: item returned
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MenuItem"
+        '404':
+          description: item not found
+    patch:
+      summary: Update a menu item
+      tags:
+      - Admin menu items
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: item updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MenuItem"
+        '422':
+          description: validation failed
+        '404':
+          description: item not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AdminMenuItemRequest"
+    delete:
+      summary: Delete a menu item
+      tags:
+      - Admin menu items
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '204':
+          description: item deleted
+        '404':
+          description: item not found
+  "/api/v1/admin/customers":
+    get:
+      summary: List customers
+      tags:
+      - Admin customers
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      description: Returns users with the customer role.
+      responses:
+        '200':
+          description: customers returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/User"
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+    post:
+      summary: Create a customer
+      tags:
+      - Admin customers
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      description: The created user is always a customer, even if role is sent.
+      responses:
+        '201':
+          description: customer created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/User"
+        '422':
+          description: validation failed
+        '403':
+          description: forbidden
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AdminCustomerRequest"
+  "/api/v1/admin/customers/{id}":
+    parameters:
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    get:
+      summary: Get a customer
+      tags:
+      - Admin customers
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: customer returned
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/User"
+        '404':
+          description: customer not found
+    patch:
+      summary: Update a customer
+      tags:
+      - Admin customers
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: customer updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/User"
+        '422':
+          description: validation failed
+        '404':
+          description: customer not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AdminCustomerRequest"
+    delete:
+      summary: Delete a customer
+      tags:
+      - Admin customers
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '204':
+          description: customer deleted
+        '404':
+          description: customer not found
+  "/api/v1/admin/orders":
+    get:
+      summary: List every customer's orders
+      tags:
+      - Admin orders
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: user_id
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: status
+        in: query
+        schema:
+          "$ref": "#/components/schemas/OrderStatus"
+        required: false
+      responses:
+        '200':
+          description: orders returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/AdminOrder"
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+  "/api/v1/admin/orders/{id}":
+    get:
+      summary: Get any customer's order
+      tags:
+      - Admin orders
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: order returned
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AdminOrder"
+        '404':
+          description: order not found
+        '401':
+          description: unauthorized
+  "/api/v1/admin/catering_reservations":
+    get:
+      summary: List catering requests
+      tags:
+      - Admin catering
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: catering requests returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/InquiryReservation"
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
+  "/api/v1/admin/catering_reservations/{id}":
+    get:
+      summary: Get a catering request
+      tags:
+      - Admin catering
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: catering request returned
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/InquiryReservation"
+        '404':
+          description: catering request not found
+        '401':
+          description: unauthorized
   "/api/v1/auth/register":
     post:
       summary: Register a user
@@ -1298,49 +2136,6 @@ paths:
       responses:
         '200':
           description: specials returned
-  "/api/v1/payments":
-    post:
-      summary: Start checkout from the cart
-      tags:
-      - Payments
-      security:
-      - BearerAuth: []
-      - CookieAuth: []
-      parameters:
-      - name: Authorization
-        in: header
-        required: false
-        schema:
-          type: string
-      responses:
-        '200':
-          description: payment session created
-        '422':
-          description: cart is empty
-        '404':
-          description: cart or delivery address not found
-        '401':
-          description: unauthorized
-      requestBody:
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/CheckoutRequest"
-  "/api/v1/payments/payment_return":
-    get:
-      summary: Cashfree return URL after the customer pays
-      tags:
-      - Payments
-      parameters:
-      - name: order_id
-        in: query
-        required: false
-        description: Cashfree gateway order id
-        schema:
-          type: string
-      responses:
-        '200':
-          description: payment flow completed
   "/api/v1/delivery_addresses":
     get:
       summary: List delivery addresses

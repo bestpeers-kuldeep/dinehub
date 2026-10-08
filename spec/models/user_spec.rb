@@ -22,6 +22,17 @@ RSpec.describe User, type: :model do
     expect(duplicate.errors[:email]).to include("has already been taken")
   end
 
+  it "defaults to the customer role and keeps admin permissions on the user" do
+    customer = create(:user)
+    admin = build(:user, :admin)
+
+    expect(customer.role).to eq("customer")
+    expect(customer.permission?("orders.read")).to be(false)
+    expect(admin.permission?("orders.read")).to be(true)
+    expect(admin.permission?("jobs.manage")).to be(true)
+    expect(admin.permission?("not.a.permission")).to be(false)
+  end
+
   it "authenticates with the given password" do
     user = build(:user, password: "password123")
 
