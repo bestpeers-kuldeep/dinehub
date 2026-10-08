@@ -272,3 +272,15 @@ unless cocktail_bar_one.reservations.overlapping(Date.current, "11:30").exists?
 end
 
 puts "Seeded table reservations: #{TableReservation.count}"
+
+
+admin = User.find_or_initialize_by(email: ENV.fetch("ADMIN_EMAIL", "admin@dinehub.local"))
+admin.assign_attributes(
+  first_name: "Dinehub",
+  last_name: "Admin",
+  phone: admin.phone.presence || ENV.fetch("ADMIN_PHONE", "555-0199"),
+  role: :admin
+)
+admin.password = ENV.fetch("ADMIN_PASSWORD", "password123") if admin.new_record?
+admin.save!
+puts "Seeded admin: #{admin.email}"

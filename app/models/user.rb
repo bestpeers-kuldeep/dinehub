@@ -1,8 +1,28 @@
 class User < ApplicationRecord
   RESET_PASSWORD_PERIOD = 1.hours
 
+  # Permissions live on the user so the admin panel can authorize from the role.
+  PERMISSIONS = {
+    customer: [].freeze,
+    admin: %w[
+      menus.manage
+      menu_categories.manage
+      menu_items.manage
+      customers.manage
+      orders.read
+      tables.manage
+      table_reservations.manage
+      parties.read
+      catering.read
+      jobs.manage
+      job_applications.read
+    ].freeze
+  }.freeze
+
   has_secure_password
   has_one_attached :profile_image
+
+  enum :role, { customer: 0, admin: 1 }
 
   normalizes :email, with: ->(email) { email.strip.downcase }
 
@@ -11,9 +31,14 @@ class User < ApplicationRecord
   validates :phone, uniqueness: true
   validates :password, length: { minimum: 8 }, allow_nil: true
 
-  has_many :carts, dependent: :destroy
+  # Orders reference carts, so they must be removed before carts.
   has_many :orders, dependent: :destroy
+  has_many :carts, dependent: :destroy
   has_many :delivery_addresses, dependent: :destroy
+
+  def permission?(name)
+    PERMISSIONS.fetch(role.to_sym, []).include?(name.to_s)
+  end
 
   def as_public_json
     {
@@ -24,6 +49,7 @@ class User < ApplicationRecord
       email: email,
       phone: phone,
       additional_phone: additional_phone,
+      role: role,
       profile_image: profile_image.attached? ? Rails.application.routes.url_helpers.rails_blob_url(profile_image) : nil
     }
   end

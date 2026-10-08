@@ -41,6 +41,24 @@ Rails.application.routes.draw do
       post "auth/forgot_password", to: "auth#forgot_password"
       post "auth/reset_password", to: "auth#reset_password"
       patch "profile", to: "auth#update_profile"
+
+      namespace :admin do
+        resources :menus
+        resources :menu_categories
+        resources :menu_items
+        resources :customers
+        resources :orders, only: %i[index show]
+        resources :tables, only: %i[index show create update]
+        resources :table_reservations, only: %i[index show destroy] do
+          member do
+            patch :deactivate
+          end
+        end
+        resources :parties_reservations, only: %i[index show]
+        resources :catering_reservations, only: %i[index show]
+        resources :jobs
+        resources :job_applications, only: %i[index show]
+      end
     end
   end
 

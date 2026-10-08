@@ -9,6 +9,8 @@ module Api
         render json: career.as_public_json, status: :created
       rescue ActiveRecord::RecordInvalid => e
         render json: { errors: e.record.errors.full_messages }, status: :unprocessable_entity
+      rescue ActiveRecord::InvalidForeignKey
+        render json: { errors: [ "Job must exist" ] }, status: :unprocessable_entity
       rescue StandardError => e
         render json: { error: e.message }, status: :internal_server_error
       end
@@ -16,7 +18,7 @@ module Api
       private
 
       def career_params
-        permitted = %i[full_name email phone opt_in experience cover_letter resume_link resume]
+        permitted = %i[full_name email phone opt_in experience cover_letter resume_link resume job_id]
         if params[:career].present?
           params.require(:career).permit(permitted)
         else
