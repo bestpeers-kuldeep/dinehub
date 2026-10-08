@@ -15,8 +15,6 @@ module CartItems
       # Same cart row lock as checkout, so an item cannot be added while an
       # order is being snapshotted from this cart.
       cart.with_lock do
-        cart.ensure_editable!
-
         @params.map do |item_params|
           add_item(cart, item_params)
         end
