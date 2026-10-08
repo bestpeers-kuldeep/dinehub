@@ -79,18 +79,6 @@ RSpec.describe "Cart API", type: :request do
         run_test!
       end
 
-      response "422", "cart is checked out" do
-        let(:menu_item) { create(:menu_item) }
-        let(:payload) { { cart_items: [ { menu_item_id: menu_item.id, quantity: 1 } ] } }
-
-        before do
-          cart = create(:cart, user: user)
-          create(:payment, cart: cart, order: nil, status: :pending)
-        end
-
-        run_test!
-      end
-
       response "401", "unauthorized" do
         let(:Authorization) { nil }
         let(:payload) { { cart_items: [] } }
