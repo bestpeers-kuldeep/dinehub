@@ -19,7 +19,6 @@ module Api
 
       def update
         @cart_item.cart.with_lock do
-          ensure_cart_editable!(@cart_item.cart)
           @cart_item.update!(quantity: update_cart_item_params[:quantity])
         end
 
