@@ -64,6 +64,20 @@ RSpec.describe Reservation, type: :model do
     expect(reservation).not_to be_persisted
   end
 
+  it "uses the admin-configured dining window" do
+    TableReservation.assign_estimated_duration!(90)
+    create(:table_reservation, table: table, reservation_date: date, start_time: "11:30")
+
+    expect(table).not_to be_available_between(date, "12:30")
+    expect(table).to be_available_between(date, "13:00")
+  end
+
+  it "ignores a deactivated reservation when checking the table" do
+    create(:table_reservation, table: table, reservation_date: date, start_time: "11:30", active: false)
+
+    expect(table).to be_available_between(date, "11:30")
+  end
+
   it "rejects start times that are not 30-minute slots" do
     reservation = build(
       :table_reservation,

@@ -48,8 +48,16 @@ Rails.application.routes.draw do
         resources :menu_items
         resources :customers
         resources :orders, only: %i[index show]
-        resources :tables, only: %i[index show create update]
+        resources :tables, only: %i[index show create update] do
+          member do
+            patch :mark_available
+          end
+        end
         resources :table_reservations, only: %i[index show destroy] do
+          collection do
+            get :estimated_duration
+            patch :estimated_duration
+          end
           member do
             patch :deactivate
           end

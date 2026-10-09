@@ -3,6 +3,7 @@ module Api
     module Admin
       class BaseController < Api::V1::BaseController
         include Authorizable
+        include Paginatable
 
         before_action :authenticate_user!
         before_action :authorize_permission!
@@ -12,6 +13,18 @@ module Api
         def resource_params(*keys, key: controller_name.singularize)
           source = params[key].present? ? params.require(key) : params
           source.permit(*keys)
+        end
+
+        # Query or JSON: `page` (default 1) and `per_page` (default 25, max 100).
+        def pagination_params
+          permitted = params.permit(:page, :per_page)
+          page = permitted[:page].to_i
+          per_page = permitted[:per_page].to_i
+
+          {
+            page: page.positive? ? page : 1,
+            per_page: per_page.positive? ? [ per_page, Paginatable::MAX_PER_PAGE ].min : Paginatable::DEFAULT_PER_PAGE
+          }
         end
 
         def render_validation_error(exception)

@@ -11,7 +11,7 @@ module Api
         def index
           items = MenuItem.order(:name)
           items = items.where(menu_category_id: params[:menu_category_id]) if params[:menu_category_id].present?
-          render json: items
+          render_collection(items)
         end
 
         def show

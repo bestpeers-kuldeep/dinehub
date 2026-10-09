@@ -7,7 +7,7 @@ module Api
         before_action :set_customer, only: %i[show update destroy]
 
         def index
-          render json: User.customer.order(created_at: :desc).map(&:as_public_json)
+          render_collection(User.customer.order(created_at: :desc)) { |customers| customers.map(&:as_public_json) }
         end
 
         def show

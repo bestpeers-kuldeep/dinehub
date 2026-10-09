@@ -9,6 +9,10 @@ FactoryBot.define do
     email
     phone
     password { "password123" }
+
+    trait :admin do
+      role { :admin }
+    end
   end
 
   factory :career do

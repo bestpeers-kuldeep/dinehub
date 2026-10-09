@@ -5,7 +5,7 @@ module Api
         requires_permission "catering.read"
 
         def index
-          render json: CateringReservation.order(created_at: :desc).map(&:as_public_json)
+          render_collection(CateringReservation.order(created_at: :desc)) { |records| records.map(&:as_public_json) }
         end
 
         def show
