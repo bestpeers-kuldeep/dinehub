@@ -79,6 +79,38 @@ RSpec.describe Payments::CreatePaymentService, type: :service do
     }.to raise_error(ArgumentError, /Unsupported payment gateway/)
   end
 
+  it "reuses the checkout session when the cart has not changed" do
+    payment = start_payment
+
+    expect(gateway_double).not_to receive(:call)
+
+    refreshed = start_payment
+
+    expect(refreshed.id).to eq(payment.id)
+    expect(refreshed.amount).to eq(20)
+    expect(refreshed.payment_session_id).to eq("session_abc")
+  end
+
+  it "charges the updated cart total when the customer leaves payment and adds an item" do
+    payment = start_payment
+    create(:cart_item, cart: cart, quantity: 1, unit_price: 15)
+
+    allow(gateway_double).to receive(:call).and_return(
+      "order_id" => "CHECKOUT_2",
+      "payment_session_id" => "session_new"
+    )
+
+    refreshed = start_payment
+
+    expect(payment.reload).to be_cancelled
+    expect(refreshed.id).not_to eq(payment.id)
+    expect(refreshed.amount).to eq(35)
+    expect(refreshed).to be_pending
+    expect(refreshed.payment_session_id).to eq("session_new")
+    expect(refreshed.metadata.dig("checkout", "total")).to eq("35.0")
+    expect(refreshed.metadata.dig("checkout", "items").size).to eq(2)
+  end
+
   it "reuses a payment that already has a session and does not call the gateway" do
     existing = create(
       :payment,
