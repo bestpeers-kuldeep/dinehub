@@ -10,6 +10,7 @@ class User < ApplicationRecord
       menu_items.manage
       customers.manage
       orders.read
+      dashboard.read
       tables.manage
       table_reservations.manage
       parties.read

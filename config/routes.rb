@@ -43,6 +43,7 @@ Rails.application.routes.draw do
       patch "profile", to: "auth#update_profile"
 
       namespace :admin do
+        get "dashboard", to: "dashboard#show"
         resources :menus
         resources :menu_categories
         resources :menu_items
