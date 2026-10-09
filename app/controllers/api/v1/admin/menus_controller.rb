@@ -7,7 +7,7 @@ module Api
         before_action :set_menu, only: %i[show update destroy]
 
         def index
-          render json: Menu.order(:name)
+          render_collection(Menu.order(:name))
         end
 
         def show

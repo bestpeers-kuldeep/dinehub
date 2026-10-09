@@ -10,10 +10,11 @@ RSpec.describe "Admin orders API", type: :request do
     get "/api/v1/admin/orders", headers: headers
 
     expect(response).to have_http_status(:ok)
-    ids = json_body.map { |order| order["id"] }
+    ids = json_body.fetch("data").map { |order| order["id"] }
     expect(ids).to contain_exactly(first_order.id, second_order.id)
-    expect(json_body.first["user"]["email"]).to be_present
-    expect(json_body.first["user"]).not_to have_key("password_digest")
+    expect(json_body.dig("pagination", "total_count")).to eq(2)
+    expect(json_body["data"].first["user"]["email"]).to be_present
+    expect(json_body["data"].first["user"]).not_to have_key("password_digest")
   end
 
   it "filters orders by customer" do
@@ -23,7 +24,7 @@ RSpec.describe "Admin orders API", type: :request do
     get "/api/v1/admin/orders", params: { user_id: order.user_id }, headers: headers
 
     expect(response).to have_http_status(:ok)
-    expect(json_body.map { |row| row["id"] }).to eq([ order.id ])
+    expect(json_body.fetch("data").map { |row| row["id"] }).to eq([ order.id ])
   end
 
   it "shows one order" do

@@ -9,7 +9,7 @@ module Api
         def index
           categories = MenuCategory.order(:name)
           categories = categories.where(menu_id: params[:menu_id]) if params[:menu_id].present?
-          render json: categories
+          render_collection(categories)
         end
 
         def show

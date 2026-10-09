@@ -36,7 +36,8 @@ RSpec.describe "Admin customers API", type: :request do
     other_admin = create(:user, :admin)
     get "/api/v1/admin/customers", headers: headers
 
-    ids = json_body.map { |user| user["id"] }
+    ids = json_body.fetch("data").map { |user| user["id"] }
+    expect(json_body.dig("pagination", "total_count")).to eq(1)
     expect(ids).to include(customer_id)
     expect(ids).not_to include(admin.id, other_admin.id)
 

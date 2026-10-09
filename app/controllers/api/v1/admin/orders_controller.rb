@@ -8,7 +8,7 @@ module Api
           orders = Order.includes(:order_items, :payment, :user).order(created_at: :desc)
           orders = orders.where(user_id: params[:user_id]) if params[:user_id].present?
           orders = orders.where(status: params[:status]) if params[:status].present?
-          render json: orders.map { |order| order_json(order) }
+          render_collection(orders) { |records| records.map { |order| order_json(order) } }
         rescue ArgumentError => e
           render json: { error: e.message }, status: :bad_request
         end

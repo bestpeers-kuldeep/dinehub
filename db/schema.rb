@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_08_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_09_103000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -229,6 +229,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_140000) do
   end
 
   create_table "reservations", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
     t.decimal "budget_per_person", precision: 10, scale: 2
     t.string "company"
     t.datetime "created_at", null: false
@@ -247,10 +248,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_08_140000) do
     t.bigint "table_id"
     t.string "type", default: "TableReservation", null: false
     t.datetime "updated_at", null: false
-    t.index ["table_id", "reservation_date", "start_time"], name: "index_reservations_on_table_date_start", unique: true, where: "(table_id IS NOT NULL)"
+    t.index ["table_id", "reservation_date", "start_time"], name: "index_reservations_on_table_date_start", unique: true, where: "((table_id IS NOT NULL) AND (active = true))"
     t.index ["table_id", "reservation_date"], name: "index_reservations_on_table_id_and_reservation_date"
     t.index ["table_id"], name: "index_reservations_on_table_id"
     t.index ["type"], name: "index_reservations_on_type"
+  end
+
+  create_table "settings", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.datetime "updated_at", null: false
+    t.string "value", null: false
+    t.index ["key"], name: "index_settings_on_key", unique: true
   end
 
   create_table "tables", force: :cascade do |t|
