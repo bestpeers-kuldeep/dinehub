@@ -1056,8 +1056,6 @@ paths:
       responses:
         '200':
           description: cart cleared
-        '422':
-          description: cart is checked out
         '401':
           description: unauthorized
   "/api/v1/cart/items":
@@ -1298,49 +1296,6 @@ paths:
       responses:
         '200':
           description: specials returned
-  "/api/v1/payments":
-    post:
-      summary: Start checkout from the cart
-      tags:
-      - Payments
-      security:
-      - BearerAuth: []
-      - CookieAuth: []
-      parameters:
-      - name: Authorization
-        in: header
-        required: false
-        schema:
-          type: string
-      responses:
-        '200':
-          description: payment session created
-        '422':
-          description: cart is empty
-        '404':
-          description: cart or delivery address not found
-        '401':
-          description: unauthorized
-      requestBody:
-        content:
-          application/json:
-            schema:
-              "$ref": "#/components/schemas/CheckoutRequest"
-  "/api/v1/payments/payment_return":
-    get:
-      summary: Cashfree return URL after the customer pays
-      tags:
-      - Payments
-      parameters:
-      - name: order_id
-        in: query
-        required: false
-        description: Cashfree gateway order id
-        schema:
-          type: string
-      responses:
-        '200':
-          description: payment flow completed
   "/api/v1/delivery_addresses":
     get:
       summary: List delivery addresses

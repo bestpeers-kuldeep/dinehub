@@ -38,15 +38,6 @@ RSpec.describe "Cart API", type: :request do
         end
       end
 
-      response "422", "cart is checked out" do
-        before do
-          cart = create(:cart, user: user)
-          create(:payment, cart: cart, order: nil, status: :pending)
-        end
-
-        run_test!
-      end
-
       response "401", "unauthorized" do
         let(:Authorization) { nil }
         run_test!
@@ -153,5 +144,16 @@ RSpec.describe "Cart API", type: :request do
         run_test!
       end
     end
+  end
+
+  it "clears a cart that already has an open checkout" do
+    cart = create(:cart, user: user)
+    create(:payment, cart: cart, order: nil, status: :pending, payment_session_id: "session_open")
+
+    delete "/api/v1/cart", headers: { "Authorization" => "Bearer #{JsonWebToken.encode({ user_id: user.id })}" }
+
+    expect(response).to have_http_status(:ok)
+    expect(json_body["message"]).to eq("Cart cleared successfully")
+    expect(cart.reload.deleted_at).to be_present
   end
 end
