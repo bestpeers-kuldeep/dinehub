@@ -32,6 +32,7 @@ Rails.application.routes.draw do
         end
       end
       post "payments/cashfree/webhook", to: "payments/cashfree_webhooks#create"
+      post "delivery_webhooks/borzo", to: "delivery_webhooks#borzo"
       get "specials", to: "specials#index"
 
       post "auth/register", to: "auth#register"
