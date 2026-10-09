@@ -21,8 +21,9 @@ module Payments
         ensure_checkout!(cart, address)
       end
 
-      # A retry of an in-progress checkout already has a session. Reusing it
-      # avoids a second Cashfree order for the same checkout.
+      # A retry of the same checkout already has a session. Reusing it avoids a
+      # second Cashfree order. ensure_checkout! cancels that session first when
+      # the cart total has changed, so this return only applies to an unchanged cart.
       return payment.reload if payment.payment_session_id.present?
 
       gateway_response = provider.new(payment).call
@@ -37,19 +38,26 @@ module Payments
       items = cart.cart_items.includes(:menu_item).to_a
       raise Orders::Errors::CartEmpty, "Cart is empty" if items.empty?
 
-      total = items.sum { |item| item.quantity * item.unit_price.to_d }
+      total = Payment.total_for(items)
       raise Orders::Errors::CartEmpty, "Cart total must be greater than 0" unless total.positive?
 
       payment = cart.payments.open_checkout.first
       if payment&.payment_session_id.present?
-        if payment.delivery_address_id != address.id
-          raise Errors::CheckoutInProgress, "Checkout is already in progress for a different address"
+        if payment.checkout_current?(items, total)
+          if payment.delivery_address_id != address.id
+            raise Errors::CheckoutInProgress, "Checkout is already in progress for a different address"
+          end
+
+          return payment
         end
 
-        return payment
+        # The session was priced for the previous cart. Cancel it and start
+        # a new checkout for the current total.
+        payment.abandon_for_cart_change!
+        payment = nil
       end
 
-      snapshot = snapshot_for(items, total)
+      snapshot = Payment.checkout_snapshot(items, total)
       if payment
         payment.update!(
           delivery_address: address,
@@ -67,22 +75,6 @@ module Payments
           metadata: { "checkout" => snapshot }
         )
       end
-    end
-
-    def snapshot_for(items, total)
-      {
-        "subtotal" => total.to_s("F"),
-        "tax" => "0.0",
-        "total" => total.to_s("F"),
-        "items" => items.map { |item|
-          {
-            "menu_item_id" => item.menu_item_id,
-            "name" => item.menu_item.name,
-            "quantity" => item.quantity,
-            "unit_price" => item.unit_price.to_s("F")
-          }
-        }
-      }
     end
 
     # The gateway call sits outside the lock. A webhook can finalize the

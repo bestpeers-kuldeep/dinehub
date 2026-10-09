@@ -27,4 +27,17 @@ class Cart < ApplicationRecord
 
     raise Orders::Errors::CartNotEditable, "Cart is checked out and cannot be changed"
   end
+
+  # A payment session is bound to the previous total. Once the cart changes,
+  # that checkout is cancelled so the next payment uses the current total.
+  def refresh_open_checkout!
+    payment = payments.open_checkout.first
+    return if payment.nil? || payment.payment_session_id.blank?
+
+    items = cart_items.to_a
+    total = Payment.total_for(items)
+    return if total.positive? && payment.checkout_current?(items, total)
+
+    payment.abandon_for_cart_change!
+  end
 end

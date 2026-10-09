@@ -31,7 +31,6 @@ module Api
 
       def destroy
         @cart_item.cart.with_lock do
-          ensure_cart_editable!(@cart_item.cart)
           @cart_item.destroy!
         end
 
