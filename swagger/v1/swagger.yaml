@@ -34,6 +34,7 @@ tags:
 - name: Admin menu items
 - name: Admin customers
 - name: Admin orders
+- name: Admin dashboard
 - name: Admin tables
 - name: Admin table reservations
 - name: Admin catering
@@ -1071,6 +1072,39 @@ components:
           type: integer
         total_pages:
           type: integer
+    DashboardPeriod:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date
+        to:
+          type: string
+          format: date
+        orders_by_status:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Order count for each status.
+        orders_total:
+          type: integer
+        revenue:
+          type: string
+          description: Sum of successful payment amounts in the period.
+          example: '120.00'
+        reservations:
+          type: integer
+          description: Active reservations whose reservation date falls in the period.
+        active_users:
+          type: integer
+          description: Customers who placed at least one order in the period.
+    Dashboard:
+      type: object
+      properties:
+        today:
+          "$ref": "#/components/schemas/DashboardPeriod"
+        range:
+          "$ref": "#/components/schemas/DashboardPeriod"
     AdminTable:
       type: object
       properties:
@@ -1188,6 +1222,51 @@ components:
           schema:
             "$ref": "#/components/schemas/Error"
 paths:
+  "/api/v1/admin/dashboard":
+    get:
+      summary: Dashboard counts for today and a date range
+      description: Returns order counts by status, successful payment revenue, active
+        reservations, and customers who ordered. `today` is always the current
+        date. `range` uses `from` and `to`, and defaults to today when either is
+        omitted.
+      tags:
+      - Admin dashboard
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+        description: Range start (YYYY-MM-DD). Defaults to today.
+      - name: to
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+        description: Range end (YYYY-MM-DD). Defaults to today.
+      responses:
+        '200':
+          description: dashboard counts
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Dashboard"
+        '422':
+          description: invalid date range
+        '401':
+          description: unauthorized
+        '403':
+          description: forbidden
   "/api/v1/admin/menus":
     get:
       summary: List menus
