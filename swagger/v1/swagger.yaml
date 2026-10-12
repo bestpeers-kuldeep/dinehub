@@ -90,12 +90,6 @@ components:
       - Covered Patio
       - Dining Room
       - Snug
-    MenuCategoryType:
-      type: string
-      enum:
-      - our_menu
-      - specials
-      - drinks
     Error:
       type: object
       properties:
@@ -115,8 +109,6 @@ components:
           type: integer
         name:
           type: string
-        category_type:
-          "$ref": "#/components/schemas/MenuCategoryType"
         created_at:
           type: string
           format: date-time
@@ -194,8 +186,6 @@ components:
               type: integer
             name:
               type: string
-            category_type:
-              "$ref": "#/components/schemas/MenuCategoryType"
         menu_items:
           type: array
           items:
@@ -831,8 +821,6 @@ components:
       properties:
         name:
           type: string
-        category_type:
-          "$ref": "#/components/schemas/MenuCategoryType"
     AdminMenuCategoryRequest:
       type: object
       required:

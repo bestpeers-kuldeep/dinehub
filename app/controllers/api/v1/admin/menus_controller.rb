@@ -15,21 +15,17 @@ module Api
         end
 
         def create
-          menu = Menu.create!(resource_params(:name, :category_type))
+          menu = Menu.create!(resource_params(:name))
           render json: menu, status: :created
         rescue ActiveRecord::RecordInvalid => e
           render_validation_error(e)
-        rescue ArgumentError => e
-          render json: { errors: [ e.message ] }, status: :unprocessable_entity
         end
 
         def update
-          @menu.update!(resource_params(:name, :category_type))
+          @menu.update!(resource_params(:name))
           render json: @menu
         rescue ActiveRecord::RecordInvalid => e
           render_validation_error(e)
-        rescue ArgumentError => e
-          render json: { errors: [ e.message ] }, status: :unprocessable_entity
         end
 
         def destroy

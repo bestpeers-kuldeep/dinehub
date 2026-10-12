@@ -1,0 +1,4554 @@
+{
+  "info": {
+    "_postman_id": "dinehub-admin-api",
+    "name": "Dinehub Admin API",
+    "description": "Sample Postman collection for the Dinehub admin API (`/api/v1/admin`), generated from `swagger/v1/swagger.yaml`.\n\nSet `baseUrl` (for example `http://localhost:3000`) and `token` to an admin JWT. Send it as `Authorization: Bearer {{token}}`. The API also accepts the `jwt` cookie.\n\nObtain the token from `POST /api/v1/auth/login` with an admin user. List endpoints use `page` (default 1) and `per_page` (default 25, max 100).\n\nEach request includes a sample JSON body where the endpoint accepts one, and a saved example response.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "menuId",
+      "value": "1"
+    },
+    {
+      "key": "menuCategoryId",
+      "value": "1"
+    },
+    {
+      "key": "menuItemId",
+      "value": "1"
+    },
+    {
+      "key": "customerId",
+      "value": "1"
+    },
+    {
+      "key": "orderId",
+      "value": "1"
+    },
+    {
+      "key": "cateringReservationId",
+      "value": "1"
+    },
+    {
+      "key": "tableId",
+      "value": "1"
+    },
+    {
+      "key": "tableReservationId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Dashboard",
+      "description": "Order counts, revenue, reservations, and active customers.",
+      "item": [
+        {
+          "name": "Dashboard counts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/dashboard?from=2026-10-01&to=2026-10-12",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "dashboard"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-10-01",
+                  "description": "Range start (YYYY-MM-DD). Defaults to today."
+                },
+                {
+                  "key": "to",
+                  "value": "2026-10-12",
+                  "description": "Range end (YYYY-MM-DD). Defaults to today."
+                }
+              ]
+            },
+            "description": "Returns order counts by status, successful payment revenue, active reservations, and customers who ordered. `today` is always the current date. `range` uses `from` and `to`, and defaults to today when either is omitted."
+          },
+          "response": [
+            {
+              "name": "200 dashboard counts",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/dashboard?from=2026-10-01&to=2026-10-12",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "dashboard"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-10-01",
+                      "description": "Range start (YYYY-MM-DD). Defaults to today."
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-12",
+                      "description": "Range end (YYYY-MM-DD). Defaults to today."
+                    }
+                  ]
+                },
+                "description": "Returns order counts by status, successful payment revenue, active reservations, and customers who ordered. `today` is always the current date. `range` uses `from` and `to`, and defaults to today when either is omitted."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"today\": {\n    \"from\": \"2026-10-12\",\n    \"to\": \"2026-10-12\",\n    \"orders_by_status\": {\n      \"pending\": 1,\n      \"confirmed\": 2,\n      \"preparing\": 0,\n      \"ready\": 1,\n      \"completed\": 4,\n      \"cancelled\": 0\n    },\n    \"orders_total\": 8,\n    \"revenue\": \"120.00\",\n    \"reservations\": 3,\n    \"active_users\": 5\n  },\n  \"range\": {\n    \"from\": \"2026-10-01\",\n    \"to\": \"2026-10-12\",\n    \"orders_by_status\": {\n      \"pending\": 1,\n      \"confirmed\": 2,\n      \"preparing\": 0,\n      \"ready\": 1,\n      \"completed\": 4,\n      \"cancelled\": 0\n    },\n    \"orders_total\": 42,\n    \"revenue\": \"980.50\",\n    \"reservations\": 18,\n    \"active_users\": 27\n  }\n}"
+            },
+            {
+              "name": "422 invalid date range",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/dashboard?from=2026-10-01&to=2026-10-12",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "dashboard"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-10-01",
+                      "description": "Range start (YYYY-MM-DD). Defaults to today."
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-12",
+                      "description": "Range end (YYYY-MM-DD). Defaults to today."
+                    }
+                  ]
+                },
+                "description": "Returns order counts by status, successful payment revenue, active reservations, and customers who ordered. `today` is always the current date. `range` uses `from` and `to`, and defaults to today when either is omitted."
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"errors\": [\n    \"from must be on or before to\"\n  ]\n}"
+            },
+            {
+              "name": "401 unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/dashboard?from=2026-10-01&to=2026-10-12",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "dashboard"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-10-01",
+                      "description": "Range start (YYYY-MM-DD). Defaults to today."
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-12",
+                      "description": "Range end (YYYY-MM-DD). Defaults to today."
+                    }
+                  ]
+                },
+                "description": "Returns order counts by status, successful payment revenue, active reservations, and customers who ordered. `today` is always the current date. `range` uses `from` and `to`, and defaults to today when either is omitted."
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"You need to sign in before continuing.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Menus",
+      "description": "Create and manage menus. A menu is identified by its name.",
+      "item": [
+        {
+          "name": "List menus",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menus?page=1&per_page=25",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menus"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number. Defaults to 1."
+                },
+                {
+                  "key": "per_page",
+                  "value": "25",
+                  "description": "Page size. Defaults to 25, maximum 100."
+                }
+              ]
+            },
+            "description": "Paginated list of menus."
+          },
+          "response": [
+            {
+              "name": "200 menus returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menus?page=1&per_page=25",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menus"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number. Defaults to 1."
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "25",
+                      "description": "Page size. Defaults to 25, maximum 100."
+                    }
+                  ]
+                },
+                "description": "Paginated list of menus."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Dinner\",\n      \"created_at\": \"2026-10-12T12:00:00.000Z\",\n      \"updated_at\": \"2026-10-12T12:00:00.000Z\"\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"per_page\": 25,\n    \"total_count\": 1,\n    \"total_pages\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create a menu",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menus",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menus"
+              ]
+            },
+            "description": "Create a menu. `name` is required.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dinner\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 menu created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menus",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menus"
+                  ]
+                },
+                "description": "Create a menu. `name` is required.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Dinner\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Dinner\",\n  \"created_at\": \"2026-10-12T12:00:00.000Z\",\n  \"updated_at\": \"2026-10-12T12:00:00.000Z\"\n}"
+            },
+            {
+              "name": "422 validation failed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menus",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menus"
+                  ]
+                },
+                "description": "Create a menu. `name` is required.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Dinner\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"errors\": [\n    \"Name can't be blank\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get a menu",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menus/{{menuId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menus",
+                "{{menuId}}"
+              ]
+            },
+            "description": "Return one menu."
+          },
+          "response": [
+            {
+              "name": "200 menu returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menus/{{menuId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menus",
+                    "{{menuId}}"
+                  ]
+                },
+                "description": "Return one menu."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Dinner\",\n  \"created_at\": \"2026-10-12T12:00:00.000Z\",\n  \"updated_at\": \"2026-10-12T12:00:00.000Z\"\n}"
+            },
+            {
+              "name": "404 menu not found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menus/{{menuId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menus",
+                    "{{menuId}}"
+                  ]
+                },
+                "description": "Return one menu."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update a menu",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menus/{{menuId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menus",
+                "{{menuId}}"
+              ]
+            },
+            "description": "Update a menu name or category type.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Weekend Dinner\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 menu updated",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menus/{{menuId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menus",
+                    "{{menuId}}"
+                  ]
+                },
+                "description": "Update a menu name or category type.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Weekend Dinner\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Weekend Dinner\",\n  \"created_at\": \"2026-10-12T12:00:00.000Z\",\n  \"updated_at\": \"2026-10-12T12:30:00.000Z\"\n}"
+            },
+            {
+              "name": "422 validation failed",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menus/{{menuId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menus",
+                    "{{menuId}}"
+                  ]
+                },
+                "description": "Update a menu name or category type.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Weekend Dinner\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"errors\": [\n    \"Name can't be blank\"\n  ]\n}"
+            },
+            {
+              "name": "404 menu not found",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menus/{{menuId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menus",
+                    "{{menuId}}"
+                  ]
+                },
+                "description": "Update a menu name or category type.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Weekend Dinner\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete a menu",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menus/{{menuId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menus",
+                "{{menuId}}"
+              ]
+            },
+            "description": "Delete a menu. Response body is empty."
+          },
+          "response": [
+            {
+              "name": "204 menu deleted",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menus/{{menuId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menus",
+                    "{{menuId}}"
+                  ]
+                },
+                "description": "Delete a menu. Response body is empty."
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "name": "404 menu not found",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menus/{{menuId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menus",
+                    "{{menuId}}"
+                  ]
+                },
+                "description": "Delete a menu. Response body is empty."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Menu categories",
+      "description": "Categories belong to a menu. `drink_type` is used for drink menus: `beer`, `wine`, `cocktails`, `spirits`, or `whiskey`.",
+      "item": [
+        {
+          "name": "List menu categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menu_categories?menu_id=1&page=1&per_page=25",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menu_categories"
+              ],
+              "query": [
+                {
+                  "key": "menu_id",
+                  "value": "1",
+                  "description": "Optional menu id filter."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number. Defaults to 1."
+                },
+                {
+                  "key": "per_page",
+                  "value": "25",
+                  "description": "Page size. Defaults to 25, maximum 100."
+                }
+              ]
+            },
+            "description": "Paginated list of menu categories. Filter with `menu_id`."
+          },
+          "response": [
+            {
+              "name": "200 categories returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_categories?menu_id=1&page=1&per_page=25",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_categories"
+                  ],
+                  "query": [
+                    {
+                      "key": "menu_id",
+                      "value": "1",
+                      "description": "Optional menu id filter."
+                    },
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number. Defaults to 1."
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "25",
+                      "description": "Page size. Defaults to 25, maximum 100."
+                    }
+                  ]
+                },
+                "description": "Paginated list of menu categories. Filter with `menu_id`."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Starters\",\n      \"menu_id\": 1,\n      \"drink_type\": null,\n      \"created_at\": \"2026-10-12T12:00:00.000Z\",\n      \"updated_at\": \"2026-10-12T12:00:00.000Z\"\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"per_page\": 25,\n    \"total_count\": 1,\n    \"total_pages\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create a menu category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menu_categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menu_categories"
+              ]
+            },
+            "description": "Create a category. `name` and `menu_id` are required.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Starters\",\n  \"menu_id\": 1,\n  \"drink_type\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 category created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_categories",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_categories"
+                  ]
+                },
+                "description": "Create a category. `name` and `menu_id` are required.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Starters\",\n  \"menu_id\": 1,\n  \"drink_type\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Starters\",\n  \"menu_id\": 1,\n  \"drink_type\": null,\n  \"created_at\": \"2026-10-12T12:00:00.000Z\",\n  \"updated_at\": \"2026-10-12T12:00:00.000Z\"\n}"
+            },
+            {
+              "name": "422 validation failed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_categories",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_categories"
+                  ]
+                },
+                "description": "Create a category. `name` and `menu_id` are required.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Starters\",\n  \"menu_id\": 1,\n  \"drink_type\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"errors\": [\n    \"Menu must exist\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get a menu category",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menu_categories/{{menuCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menu_categories",
+                "{{menuCategoryId}}"
+              ]
+            },
+            "description": "Return one menu category."
+          },
+          "response": [
+            {
+              "name": "200 category returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_categories/{{menuCategoryId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_categories",
+                    "{{menuCategoryId}}"
+                  ]
+                },
+                "description": "Return one menu category."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Starters\",\n  \"menu_id\": 1,\n  \"drink_type\": null,\n  \"created_at\": \"2026-10-12T12:00:00.000Z\",\n  \"updated_at\": \"2026-10-12T12:00:00.000Z\"\n}"
+            },
+            {
+              "name": "404 category not found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_categories/{{menuCategoryId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_categories",
+                    "{{menuCategoryId}}"
+                  ]
+                },
+                "description": "Return one menu category."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update a menu category",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menu_categories/{{menuCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menu_categories",
+                "{{menuCategoryId}}"
+              ]
+            },
+            "description": "Update a category. Set `drink_type` for a drinks category.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"House Beer\",\n  \"menu_id\": 1,\n  \"drink_type\": \"beer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 category updated",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_categories/{{menuCategoryId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_categories",
+                    "{{menuCategoryId}}"
+                  ]
+                },
+                "description": "Update a category. Set `drink_type` for a drinks category.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"House Beer\",\n  \"menu_id\": 1,\n  \"drink_type\": \"beer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"House Beer\",\n  \"menu_id\": 1,\n  \"drink_type\": \"beer\",\n  \"created_at\": \"2026-10-12T12:00:00.000Z\",\n  \"updated_at\": \"2026-10-12T12:30:00.000Z\"\n}"
+            },
+            {
+              "name": "422 validation failed",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_categories/{{menuCategoryId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_categories",
+                    "{{menuCategoryId}}"
+                  ]
+                },
+                "description": "Update a category. Set `drink_type` for a drinks category.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"House Beer\",\n  \"menu_id\": 1,\n  \"drink_type\": \"beer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"errors\": [\n    \"Drink type is not included in the list\"\n  ]\n}"
+            },
+            {
+              "name": "404 category not found",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_categories/{{menuCategoryId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_categories",
+                    "{{menuCategoryId}}"
+                  ]
+                },
+                "description": "Update a category. Set `drink_type` for a drinks category.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"House Beer\",\n  \"menu_id\": 1,\n  \"drink_type\": \"beer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete a menu category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menu_categories/{{menuCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menu_categories",
+                "{{menuCategoryId}}"
+              ]
+            },
+            "description": "Delete a menu category. Response body is empty."
+          },
+          "response": [
+            {
+              "name": "204 category deleted",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_categories/{{menuCategoryId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_categories",
+                    "{{menuCategoryId}}"
+                  ]
+                },
+                "description": "Delete a menu category. Response body is empty."
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "name": "404 category not found",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_categories/{{menuCategoryId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_categories",
+                    "{{menuCategoryId}}"
+                  ]
+                },
+                "description": "Delete a menu category. Response body is empty."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Menu items",
+      "description": "Items belong to a menu category. `price` is a number on write and a decimal string on read.",
+      "item": [
+        {
+          "name": "List menu items",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menu_items?menu_category_id=1&page=1&per_page=25",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menu_items"
+              ],
+              "query": [
+                {
+                  "key": "menu_category_id",
+                  "value": "1",
+                  "description": "Optional category id filter."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number. Defaults to 1."
+                },
+                {
+                  "key": "per_page",
+                  "value": "25",
+                  "description": "Page size. Defaults to 25, maximum 100."
+                }
+              ]
+            },
+            "description": "Paginated list of menu items. Filter with `menu_category_id`."
+          },
+          "response": [
+            {
+              "name": "200 items returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_items?menu_category_id=1&page=1&per_page=25",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_items"
+                  ],
+                  "query": [
+                    {
+                      "key": "menu_category_id",
+                      "value": "1",
+                      "description": "Optional category id filter."
+                    },
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number. Defaults to 1."
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "25",
+                      "description": "Page size. Defaults to 25, maximum 100."
+                    }
+                  ]
+                },
+                "description": "Paginated list of menu items. Filter with `menu_category_id`."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Fish and Chips\",\n      \"description\": \"Beer-battered cod with chips and tartar sauce\",\n      \"price\": \"12.50\",\n      \"start_at\": null,\n      \"end_at\": null,\n      \"menu_category_id\": 1,\n      \"menu_category_name\": \"Starters\",\n      \"image_url\": null,\n      \"created_at\": \"2026-10-12T12:00:00.000Z\",\n      \"updated_at\": \"2026-10-12T12:00:00.000Z\"\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"per_page\": 25,\n    \"total_count\": 1,\n    \"total_pages\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create a menu item",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menu_items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menu_items"
+              ]
+            },
+            "description": "Create a menu item. `name`, `price`, and `menu_category_id` are required. `start_at` and `end_at` limit specials to a window.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fish and Chips\",\n  \"description\": \"Beer-battered cod with chips and tartar sauce\",\n  \"price\": 12.5,\n  \"menu_category_id\": 1,\n  \"start_at\": null,\n  \"end_at\": null,\n  \"image_url\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 item created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_items",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_items"
+                  ]
+                },
+                "description": "Create a menu item. `name`, `price`, and `menu_category_id` are required. `start_at` and `end_at` limit specials to a window.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Fish and Chips\",\n  \"description\": \"Beer-battered cod with chips and tartar sauce\",\n  \"price\": 12.5,\n  \"menu_category_id\": 1,\n  \"start_at\": null,\n  \"end_at\": null,\n  \"image_url\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Fish and Chips\",\n  \"description\": \"Beer-battered cod with chips and tartar sauce\",\n  \"price\": \"12.50\",\n  \"start_at\": null,\n  \"end_at\": null,\n  \"menu_category_id\": 1,\n  \"menu_category_name\": \"Starters\",\n  \"image_url\": null,\n  \"created_at\": \"2026-10-12T12:00:00.000Z\",\n  \"updated_at\": \"2026-10-12T12:00:00.000Z\"\n}"
+            },
+            {
+              "name": "422 validation failed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_items",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_items"
+                  ]
+                },
+                "description": "Create a menu item. `name`, `price`, and `menu_category_id` are required. `start_at` and `end_at` limit specials to a window.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Fish and Chips\",\n  \"description\": \"Beer-battered cod with chips and tartar sauce\",\n  \"price\": 12.5,\n  \"menu_category_id\": 1,\n  \"start_at\": null,\n  \"end_at\": null,\n  \"image_url\": null\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"errors\": [\n    \"Price can't be blank\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get a menu item",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menu_items/{{menuItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menu_items",
+                "{{menuItemId}}"
+              ]
+            },
+            "description": "Return one menu item."
+          },
+          "response": [
+            {
+              "name": "200 item returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_items/{{menuItemId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_items",
+                    "{{menuItemId}}"
+                  ]
+                },
+                "description": "Return one menu item."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Fish and Chips\",\n  \"description\": \"Beer-battered cod with chips and tartar sauce\",\n  \"price\": \"12.50\",\n  \"start_at\": null,\n  \"end_at\": null,\n  \"menu_category_id\": 1,\n  \"menu_category_name\": \"Starters\",\n  \"image_url\": null,\n  \"created_at\": \"2026-10-12T12:00:00.000Z\",\n  \"updated_at\": \"2026-10-12T12:00:00.000Z\"\n}"
+            },
+            {
+              "name": "404 item not found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_items/{{menuItemId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_items",
+                    "{{menuItemId}}"
+                  ]
+                },
+                "description": "Return one menu item."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update a menu item",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menu_items/{{menuItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menu_items",
+                "{{menuItemId}}"
+              ]
+            },
+            "description": "Update a menu item.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fish and Chips (special)\",\n  \"description\": \"Beer-battered cod with chips, peas, and tartar sauce\",\n  \"price\": 14.0,\n  \"menu_category_id\": 1,\n  \"start_at\": \"2026-10-12T17:00:00Z\",\n  \"end_at\": \"2026-10-18T23:00:00Z\",\n  \"image_url\": \"https://example.com/images/fish-and-chips.jpg\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 item updated",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_items/{{menuItemId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_items",
+                    "{{menuItemId}}"
+                  ]
+                },
+                "description": "Update a menu item.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Fish and Chips (special)\",\n  \"description\": \"Beer-battered cod with chips, peas, and tartar sauce\",\n  \"price\": 14.0,\n  \"menu_category_id\": 1,\n  \"start_at\": \"2026-10-12T17:00:00Z\",\n  \"end_at\": \"2026-10-18T23:00:00Z\",\n  \"image_url\": \"https://example.com/images/fish-and-chips.jpg\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Fish and Chips (special)\",\n  \"description\": \"Beer-battered cod with chips, peas, and tartar sauce\",\n  \"price\": \"14.00\",\n  \"start_at\": \"2026-10-12T17:00:00.000Z\",\n  \"end_at\": \"2026-10-18T23:00:00.000Z\",\n  \"menu_category_id\": 1,\n  \"menu_category_name\": \"Starters\",\n  \"image_url\": \"https://example.com/images/fish-and-chips.jpg\",\n  \"created_at\": \"2026-10-12T12:00:00.000Z\",\n  \"updated_at\": \"2026-10-12T12:30:00.000Z\"\n}"
+            },
+            {
+              "name": "422 validation failed",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_items/{{menuItemId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_items",
+                    "{{menuItemId}}"
+                  ]
+                },
+                "description": "Update a menu item.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Fish and Chips (special)\",\n  \"description\": \"Beer-battered cod with chips, peas, and tartar sauce\",\n  \"price\": 14.0,\n  \"menu_category_id\": 1,\n  \"start_at\": \"2026-10-12T17:00:00Z\",\n  \"end_at\": \"2026-10-18T23:00:00Z\",\n  \"image_url\": \"https://example.com/images/fish-and-chips.jpg\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"errors\": [\n    \"Price must be greater than or equal to 0\"\n  ]\n}"
+            },
+            {
+              "name": "404 item not found",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_items/{{menuItemId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_items",
+                    "{{menuItemId}}"
+                  ]
+                },
+                "description": "Update a menu item.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Fish and Chips (special)\",\n  \"description\": \"Beer-battered cod with chips, peas, and tartar sauce\",\n  \"price\": 14.0,\n  \"menu_category_id\": 1,\n  \"start_at\": \"2026-10-12T17:00:00Z\",\n  \"end_at\": \"2026-10-18T23:00:00Z\",\n  \"image_url\": \"https://example.com/images/fish-and-chips.jpg\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete a menu item",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/menu_items/{{menuItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "menu_items",
+                "{{menuItemId}}"
+              ]
+            },
+            "description": "Delete a menu item. Response body is empty."
+          },
+          "response": [
+            {
+              "name": "204 item deleted",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_items/{{menuItemId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_items",
+                    "{{menuItemId}}"
+                  ]
+                },
+                "description": "Delete a menu item. Response body is empty."
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "name": "404 item not found",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/menu_items/{{menuItemId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "menu_items",
+                    "{{menuItemId}}"
+                  ]
+                },
+                "description": "Delete a menu item. Response body is empty."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "description": "Users with the customer role. The created user is always a customer.",
+      "item": [
+        {
+          "name": "List customers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/customers?page=1&per_page=25",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "customers"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number. Defaults to 1."
+                },
+                {
+                  "key": "per_page",
+                  "value": "25",
+                  "description": "Page size. Defaults to 25, maximum 100."
+                }
+              ]
+            },
+            "description": "Paginated list of users with the customer role."
+          },
+          "response": [
+            {
+              "name": "200 customers returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/customers?page=1&per_page=25",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "customers"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number. Defaults to 1."
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "25",
+                      "description": "Page size. Defaults to 25, maximum 100."
+                    }
+                  ]
+                },
+                "description": "Paginated list of users with the customer role."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"first_name\": \"Ava\",\n      \"last_name\": \"Walsh\",\n      \"full_name\": \"Ava Walsh\",\n      \"email\": \"ava.walsh@example.com\",\n      \"phone\": \"+353871234567\",\n      \"additional_phone\": null,\n      \"role\": \"customer\",\n      \"profile_image\": null\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"per_page\": 25,\n    \"total_count\": 1,\n    \"total_pages\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create a customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/customers",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "customers"
+              ]
+            },
+            "description": "Create a customer. `first_name`, `last_name`, `email`, `phone`, and `password` are required.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Ava\",\n  \"last_name\": \"Walsh\",\n  \"email\": \"ava.walsh@example.com\",\n  \"phone\": \"+353871234567\",\n  \"additional_phone\": null,\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 customer created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/customers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "customers"
+                  ]
+                },
+                "description": "Create a customer. `first_name`, `last_name`, `email`, `phone`, and `password` are required.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"first_name\": \"Ava\",\n  \"last_name\": \"Walsh\",\n  \"email\": \"ava.walsh@example.com\",\n  \"phone\": \"+353871234567\",\n  \"additional_phone\": null,\n  \"password\": \"password123\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"first_name\": \"Ava\",\n  \"last_name\": \"Walsh\",\n  \"full_name\": \"Ava Walsh\",\n  \"email\": \"ava.walsh@example.com\",\n  \"phone\": \"+353871234567\",\n  \"additional_phone\": null,\n  \"role\": \"customer\",\n  \"profile_image\": null\n}"
+            },
+            {
+              "name": "422 validation failed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/customers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "customers"
+                  ]
+                },
+                "description": "Create a customer. `first_name`, `last_name`, `email`, `phone`, and `password` are required.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"first_name\": \"Ava\",\n  \"last_name\": \"Walsh\",\n  \"email\": \"ava.walsh@example.com\",\n  \"phone\": \"+353871234567\",\n  \"additional_phone\": null,\n  \"password\": \"password123\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"errors\": [\n    \"Email has already been taken\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get a customer",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/customers/{{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "customers",
+                "{{customerId}}"
+              ]
+            },
+            "description": "Return one customer."
+          },
+          "response": [
+            {
+              "name": "200 customer returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/customers/{{customerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "customers",
+                    "{{customerId}}"
+                  ]
+                },
+                "description": "Return one customer."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"first_name\": \"Ava\",\n  \"last_name\": \"Walsh\",\n  \"full_name\": \"Ava Walsh\",\n  \"email\": \"ava.walsh@example.com\",\n  \"phone\": \"+353871234567\",\n  \"additional_phone\": null,\n  \"role\": \"customer\",\n  \"profile_image\": null\n}"
+            },
+            {
+              "name": "404 customer not found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/customers/{{customerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "customers",
+                    "{{customerId}}"
+                  ]
+                },
+                "description": "Return one customer."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update a customer",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/customers/{{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "customers",
+                "{{customerId}}"
+              ]
+            },
+            "description": "Update a customer. Omit `password` to keep the current password.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Ava\",\n  \"last_name\": \"Walsh\",\n  \"email\": \"ava.walsh@example.com\",\n  \"phone\": \"+353871234568\",\n  \"additional_phone\": \"+353861110000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 customer updated",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/customers/{{customerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "customers",
+                    "{{customerId}}"
+                  ]
+                },
+                "description": "Update a customer. Omit `password` to keep the current password.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"first_name\": \"Ava\",\n  \"last_name\": \"Walsh\",\n  \"email\": \"ava.walsh@example.com\",\n  \"phone\": \"+353871234568\",\n  \"additional_phone\": \"+353861110000\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"first_name\": \"Ava\",\n  \"last_name\": \"Walsh\",\n  \"full_name\": \"Ava Walsh\",\n  \"email\": \"ava.walsh@example.com\",\n  \"phone\": \"+353871234568\",\n  \"additional_phone\": \"+353861110000\",\n  \"role\": \"customer\",\n  \"profile_image\": null\n}"
+            },
+            {
+              "name": "422 validation failed",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/customers/{{customerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "customers",
+                    "{{customerId}}"
+                  ]
+                },
+                "description": "Update a customer. Omit `password` to keep the current password.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"first_name\": \"Ava\",\n  \"last_name\": \"Walsh\",\n  \"email\": \"ava.walsh@example.com\",\n  \"phone\": \"+353871234568\",\n  \"additional_phone\": \"+353861110000\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"errors\": [\n    \"Email is invalid\"\n  ]\n}"
+            },
+            {
+              "name": "404 customer not found",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/customers/{{customerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "customers",
+                    "{{customerId}}"
+                  ]
+                },
+                "description": "Update a customer. Omit `password` to keep the current password.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"first_name\": \"Ava\",\n  \"last_name\": \"Walsh\",\n  \"email\": \"ava.walsh@example.com\",\n  \"phone\": \"+353871234568\",\n  \"additional_phone\": \"+353861110000\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete a customer",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/customers/{{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "customers",
+                "{{customerId}}"
+              ]
+            },
+            "description": "Delete a customer. Response body is empty."
+          },
+          "response": [
+            {
+              "name": "204 customer deleted",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/customers/{{customerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "customers",
+                    "{{customerId}}"
+                  ]
+                },
+                "description": "Delete a customer. Response body is empty."
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "name": "404 customer not found",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/customers/{{customerId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "customers",
+                    "{{customerId}}"
+                  ]
+                },
+                "description": "Delete a customer. Response body is empty."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "description": "Read every customer's orders. Filter by `user_id` or `status`.",
+      "item": [
+        {
+          "name": "List orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/orders?user_id=1&status=confirmed&page=1&per_page=25",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "1",
+                  "description": "Optional customer id filter."
+                },
+                {
+                  "key": "status",
+                  "value": "confirmed",
+                  "description": "pending, confirmed, preparing, ready, completed, or cancelled."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number. Defaults to 1."
+                },
+                {
+                  "key": "per_page",
+                  "value": "25",
+                  "description": "Page size. Defaults to 25, maximum 100."
+                }
+              ]
+            },
+            "description": "Paginated list of every customer's orders."
+          },
+          "response": [
+            {
+              "name": "200 orders returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/orders?user_id=1&status=confirmed&page=1&per_page=25",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "orders"
+                  ],
+                  "query": [
+                    {
+                      "key": "user_id",
+                      "value": "1",
+                      "description": "Optional customer id filter."
+                    },
+                    {
+                      "key": "status",
+                      "value": "confirmed",
+                      "description": "pending, confirmed, preparing, ready, completed, or cancelled."
+                    },
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number. Defaults to 1."
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "25",
+                      "description": "Page size. Defaults to 25, maximum 100."
+                    }
+                  ]
+                },
+                "description": "Paginated list of every customer's orders."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"user_id\": 1,\n      \"cart_id\": 10,\n      \"delivery_address_id\": 3,\n      \"status\": \"confirmed\",\n      \"subtotal\": \"25.00\",\n      \"tax\": \"2.50\",\n      \"total\": \"27.50\",\n      \"created_at\": \"2026-10-12T12:00:00.000Z\",\n      \"updated_at\": \"2026-10-12T12:00:00.000Z\",\n      \"order_items\": [\n        {\n          \"id\": 1,\n          \"order_id\": 1,\n          \"menu_item_id\": 1,\n          \"name\": \"Fish and Chips\",\n          \"quantity\": 2,\n          \"unit_price\": \"12.50\",\n          \"total_price\": \"25.00\"\n        }\n      ],\n      \"payment\": {\n        \"id\": 1,\n        \"amount\": \"27.50\",\n        \"currency\": \"INR\",\n        \"gateway\": \"cashfree\",\n        \"status\": \"successful\",\n        \"gateway_order_id\": \"CHECKOUT_1\",\n        \"gateway_payment_id\": \"pay_123\"\n      },\n      \"user\": {\n        \"id\": 1,\n        \"first_name\": \"Ava\",\n        \"last_name\": \"Walsh\",\n        \"email\": \"ava.walsh@example.com\",\n        \"phone\": \"+353871234567\",\n        \"role\": \"customer\"\n      }\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"per_page\": 25,\n    \"total_count\": 1,\n    \"total_pages\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get an order",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/orders/{{orderId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "orders",
+                "{{orderId}}"
+              ]
+            },
+            "description": "Return one order with items, payment, and customer."
+          },
+          "response": [
+            {
+              "name": "200 order returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/orders/{{orderId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "orders",
+                    "{{orderId}}"
+                  ]
+                },
+                "description": "Return one order with items, payment, and customer."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"user_id\": 1,\n  \"cart_id\": 10,\n  \"delivery_address_id\": 3,\n  \"status\": \"confirmed\",\n  \"subtotal\": \"25.00\",\n  \"tax\": \"2.50\",\n  \"total\": \"27.50\",\n  \"created_at\": \"2026-10-12T12:00:00.000Z\",\n  \"updated_at\": \"2026-10-12T12:00:00.000Z\",\n  \"order_items\": [\n    {\n      \"id\": 1,\n      \"order_id\": 1,\n      \"menu_item_id\": 1,\n      \"name\": \"Fish and Chips\",\n      \"quantity\": 2,\n      \"unit_price\": \"12.50\",\n      \"total_price\": \"25.00\"\n    }\n  ],\n  \"payment\": {\n    \"id\": 1,\n    \"amount\": \"27.50\",\n    \"currency\": \"INR\",\n    \"gateway\": \"cashfree\",\n    \"status\": \"successful\",\n    \"gateway_order_id\": \"CHECKOUT_1\",\n    \"gateway_payment_id\": \"pay_123\"\n  },\n  \"user\": {\n    \"id\": 1,\n    \"first_name\": \"Ava\",\n    \"last_name\": \"Walsh\",\n    \"email\": \"ava.walsh@example.com\",\n    \"phone\": \"+353871234567\",\n    \"role\": \"customer\"\n  }\n}"
+            },
+            {
+              "name": "404 order not found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/orders/{{orderId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "orders",
+                    "{{orderId}}"
+                  ]
+                },
+                "description": "Return one order with items, payment, and customer."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Catering",
+      "description": "Read catering (party) requests.",
+      "item": [
+        {
+          "name": "List catering requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/catering_reservations?page=1&per_page=25",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "catering_reservations"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number. Defaults to 1."
+                },
+                {
+                  "key": "per_page",
+                  "value": "25",
+                  "description": "Page size. Defaults to 25, maximum 100."
+                }
+              ]
+            },
+            "description": "Paginated list of catering requests."
+          },
+          "response": [
+            {
+              "name": "200 catering requests returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/catering_reservations?page=1&per_page=25",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "catering_reservations"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number. Defaults to 1."
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "25",
+                      "description": "Page size. Defaults to 25, maximum 100."
+                    }
+                  ]
+                },
+                "description": "Paginated list of catering requests."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"type\": \"PartiesReservation\",\n      \"full_name\": \"Liam Byrne\",\n      \"phone\": \"+353861112233\",\n      \"email\": \"liam.byrne@example.com\",\n      \"company\": \"Byrne Events\",\n      \"reservation_date\": \"2026-11-14\",\n      \"start_time\": \"18:00\",\n      \"duration\": \"2 hours\",\n      \"budget_per_person\": \"45.0\",\n      \"number_of_people\": 20,\n      \"occasion\": \"Birthday\",\n      \"description\": \"Private dining for a birthday dinner\",\n      \"special_requests\": \"One vegetarian guest\",\n      \"source\": \"website\",\n      \"marketing_opt_in\": true\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"per_page\": 25,\n    \"total_count\": 1,\n    \"total_pages\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get a catering request",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/catering_reservations/{{cateringReservationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "catering_reservations",
+                "{{cateringReservationId}}"
+              ]
+            },
+            "description": "Return one catering request."
+          },
+          "response": [
+            {
+              "name": "200 catering request returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/catering_reservations/{{cateringReservationId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "catering_reservations",
+                    "{{cateringReservationId}}"
+                  ]
+                },
+                "description": "Return one catering request."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"type\": \"PartiesReservation\",\n  \"full_name\": \"Liam Byrne\",\n  \"phone\": \"+353861112233\",\n  \"email\": \"liam.byrne@example.com\",\n  \"company\": \"Byrne Events\",\n  \"reservation_date\": \"2026-11-14\",\n  \"start_time\": \"18:00\",\n  \"duration\": \"2 hours\",\n  \"budget_per_person\": \"45.0\",\n  \"number_of_people\": 20,\n  \"occasion\": \"Birthday\",\n  \"description\": \"Private dining for a birthday dinner\",\n  \"special_requests\": \"One vegetarian guest\",\n  \"source\": \"website\",\n  \"marketing_opt_in\": true\n}"
+            },
+            {
+              "name": "404 catering request not found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/catering_reservations/{{cateringReservationId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "catering_reservations",
+                    "{{cateringReservationId}}"
+                  ]
+                },
+                "description": "Return one catering request."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Tables",
+      "description": "Dining tables. `location` is Cocktail Bar, Covered Patio, Dining Room, or Snug. Capacity is 1 to 19.",
+      "item": [
+        {
+          "name": "List tables",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/tables?location=Dining Room&date=2026-10-18&start_time=18:00&page=1&per_page=25",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "tables"
+              ],
+              "query": [
+                {
+                  "key": "location",
+                  "value": "Dining Room",
+                  "description": "Cocktail Bar, Covered Patio, Dining Room, or Snug."
+                },
+                {
+                  "key": "date",
+                  "value": "2026-10-18",
+                  "description": "Slot used for the available flag. Defaults to today."
+                },
+                {
+                  "key": "start_time",
+                  "value": "18:00",
+                  "description": "Slot used for the available flag. Defaults to the current time."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number. Defaults to 1."
+                },
+                {
+                  "key": "per_page",
+                  "value": "25",
+                  "description": "Page size. Defaults to 25, maximum 100."
+                }
+              ]
+            },
+            "description": "List tables and whether each is available for the given date and start time. Those default to now."
+          },
+          "response": [
+            {
+              "name": "200 tables returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/tables?location=Dining Room&date=2026-10-18&start_time=18:00&page=1&per_page=25",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "tables"
+                  ],
+                  "query": [
+                    {
+                      "key": "location",
+                      "value": "Dining Room",
+                      "description": "Cocktail Bar, Covered Patio, Dining Room, or Snug."
+                    },
+                    {
+                      "key": "date",
+                      "value": "2026-10-18",
+                      "description": "Slot used for the available flag. Defaults to today."
+                    },
+                    {
+                      "key": "start_time",
+                      "value": "18:00",
+                      "description": "Slot used for the available flag. Defaults to the current time."
+                    },
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number. Defaults to 1."
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "25",
+                      "description": "Page size. Defaults to 25, maximum 100."
+                    }
+                  ]
+                },
+                "description": "List tables and whether each is available for the given date and start time. Those default to now."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Table 4\",\n      \"location\": \"Dining Room\",\n      \"capacity\": 4,\n      \"available\": true,\n      \"active_reservations_count\": 0\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"per_page\": 25,\n    \"total_count\": 1,\n    \"total_pages\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create a table",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/tables",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "tables"
+              ]
+            },
+            "description": "Create a table. `name`, `location`, and `capacity` are required.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Table 4\",\n  \"location\": \"Dining Room\",\n  \"capacity\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "201 table created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/tables",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "tables"
+                  ]
+                },
+                "description": "Create a table. `name`, `location`, and `capacity` are required.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Table 4\",\n  \"location\": \"Dining Room\",\n  \"capacity\": 4\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Table 4\",\n  \"location\": \"Dining Room\",\n  \"capacity\": 4,\n  \"available\": true,\n  \"active_reservations_count\": 0\n}"
+            },
+            {
+              "name": "422 validation failed",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/tables",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "tables"
+                  ]
+                },
+                "description": "Create a table. `name`, `location`, and `capacity` are required.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Table 4\",\n  \"location\": \"Dining Room\",\n  \"capacity\": 4\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"errors\": [\n    \"Capacity must be less than or equal to 19\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get a table",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/tables/{{tableId}}?date=2026-10-18&start_time=18:00",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "tables",
+                "{{tableId}}"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-10-18",
+                  "description": "Optional slot date."
+                },
+                {
+                  "key": "start_time",
+                  "value": "18:00",
+                  "description": "Optional slot time."
+                }
+              ]
+            },
+            "description": "Return a table and whether it is available for the optional date and start time."
+          },
+          "response": [
+            {
+              "name": "200 table returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/tables/{{tableId}}?date=2026-10-18&start_time=18:00",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "tables",
+                    "{{tableId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "2026-10-18",
+                      "description": "Optional slot date."
+                    },
+                    {
+                      "key": "start_time",
+                      "value": "18:00",
+                      "description": "Optional slot time."
+                    }
+                  ]
+                },
+                "description": "Return a table and whether it is available for the optional date and start time."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Table 4\",\n  \"location\": \"Dining Room\",\n  \"capacity\": 4,\n  \"available\": true,\n  \"active_reservations_count\": 0\n}"
+            },
+            {
+              "name": "404 table not found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/tables/{{tableId}}?date=2026-10-18&start_time=18:00",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "tables",
+                    "{{tableId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "2026-10-18",
+                      "description": "Optional slot date."
+                    },
+                    {
+                      "key": "start_time",
+                      "value": "18:00",
+                      "description": "Optional slot time."
+                    }
+                  ]
+                },
+                "description": "Return a table and whether it is available for the optional date and start time."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update a table",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/tables/{{tableId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "tables",
+                "{{tableId}}"
+              ]
+            },
+            "description": "Update a table name, location, or capacity.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Window 4\",\n  \"location\": \"Dining Room\",\n  \"capacity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 table updated",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/tables/{{tableId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "tables",
+                    "{{tableId}}"
+                  ]
+                },
+                "description": "Update a table name, location, or capacity.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Window 4\",\n  \"location\": \"Dining Room\",\n  \"capacity\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Window 4\",\n  \"location\": \"Dining Room\",\n  \"capacity\": 2,\n  \"available\": true,\n  \"active_reservations_count\": 0\n}"
+            },
+            {
+              "name": "422 validation failed",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/tables/{{tableId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "tables",
+                    "{{tableId}}"
+                  ]
+                },
+                "description": "Update a table name, location, or capacity.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Window 4\",\n  \"location\": \"Dining Room\",\n  \"capacity\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"errors\": [\n    \"Location is not included in the list\"\n  ]\n}"
+            },
+            {
+              "name": "404 table not found",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/tables/{{tableId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "tables",
+                    "{{tableId}}"
+                  ]
+                },
+                "description": "Update a table name, location, or capacity.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Window 4\",\n  \"location\": \"Dining Room\",\n  \"capacity\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mark a table available",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/tables/{{tableId}}/mark_available?date=2026-10-18&start_time=18:00",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "tables",
+                "{{tableId}}",
+                "mark_available"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-10-18",
+                  "description": "Optional. Release only this date."
+                },
+                {
+                  "key": "start_time",
+                  "value": "18:00",
+                  "description": "Optional. Release only this arrival slot."
+                }
+              ]
+            },
+            "description": "Deactivates reservations for this table so the sitting can be booked again. Pass date and start_time to release only that sitting; otherwise every active reservation on the table is released."
+          },
+          "response": [
+            {
+              "name": "200 table marked available",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/tables/{{tableId}}/mark_available?date=2026-10-18&start_time=18:00",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "tables",
+                    "{{tableId}}",
+                    "mark_available"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "2026-10-18",
+                      "description": "Optional. Release only this date."
+                    },
+                    {
+                      "key": "start_time",
+                      "value": "18:00",
+                      "description": "Optional. Release only this arrival slot."
+                    }
+                  ]
+                },
+                "description": "Deactivates reservations for this table so the sitting can be booked again. Pass date and start_time to release only that sitting; otherwise every active reservation on the table is released."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Table 4\",\n  \"location\": \"Dining Room\",\n  \"capacity\": 4,\n  \"available\": true,\n  \"active_reservations_count\": 0,\n  \"released_count\": 1\n}"
+            },
+            {
+              "name": "404 table not found",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/tables/{{tableId}}/mark_available?date=2026-10-18&start_time=18:00",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "tables",
+                    "{{tableId}}",
+                    "mark_available"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "2026-10-18",
+                      "description": "Optional. Release only this date."
+                    },
+                    {
+                      "key": "start_time",
+                      "value": "18:00",
+                      "description": "Optional. Release only this arrival slot."
+                    }
+                  ]
+                },
+                "description": "Deactivates reservations for this table so the sitting can be booked again. Pass date and start_time to release only that sitting; otherwise every active reservation on the table is released."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Table reservations",
+      "description": "Reservations hold a dining window (2 hours / 120 minutes by default). Arrival times are on a 30-minute slot.",
+      "item": [
+        {
+          "name": "List table reservations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/table_reservations?table_id=1&date=2026-10-18&active=true&page=1&per_page=25",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "table_reservations"
+              ],
+              "query": [
+                {
+                  "key": "table_id",
+                  "value": "1",
+                  "description": "Optional table id."
+                },
+                {
+                  "key": "date",
+                  "value": "2026-10-18",
+                  "description": "Optional reservation date."
+                },
+                {
+                  "key": "active",
+                  "value": "true",
+                  "description": "true or false."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number. Defaults to 1."
+                },
+                {
+                  "key": "per_page",
+                  "value": "25",
+                  "description": "Page size. Defaults to 25, maximum 100."
+                }
+              ]
+            },
+            "description": "Paginated list of table reservations. Filter by table, date, or active flag."
+          },
+          "response": [
+            {
+              "name": "200 reservations returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/table_reservations?table_id=1&date=2026-10-18&active=true&page=1&per_page=25",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "table_reservations"
+                  ],
+                  "query": [
+                    {
+                      "key": "table_id",
+                      "value": "1",
+                      "description": "Optional table id."
+                    },
+                    {
+                      "key": "date",
+                      "value": "2026-10-18",
+                      "description": "Optional reservation date."
+                    },
+                    {
+                      "key": "active",
+                      "value": "true",
+                      "description": "true or false."
+                    },
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number. Defaults to 1."
+                    },
+                    {
+                      "key": "per_page",
+                      "value": "25",
+                      "description": "Page size. Defaults to 25, maximum 100."
+                    }
+                  ]
+                },
+                "description": "Paginated list of table reservations. Filter by table, date, or active flag."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"data\": [\n    {\n      \"id\": 1,\n      \"type\": \"TableReservation\",\n      \"location\": \"Dining Room\",\n      \"reservation_date\": \"2026-10-18\",\n      \"start_time\": \"18:00\",\n      \"estimated_end_time\": \"20:00\",\n      \"number_of_people\": 4,\n      \"full_name\": \"Ava Walsh\",\n      \"email\": \"ava.walsh@example.com\",\n      \"phone\": \"+353871234567\",\n      \"occasion\": \"Anniversary\",\n      \"special_requests\": \"Window seat if possible\",\n      \"marketing_opt_in\": false,\n      \"table_id\": 1,\n      \"table_name\": \"Table 4\",\n      \"active\": true,\n      \"estimated_duration_minutes\": 120\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"per_page\": 25,\n    \"total_count\": 1,\n    \"total_pages\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get the dining window",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/table_reservations/estimated_duration",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "table_reservations",
+                "estimated_duration"
+              ]
+            },
+            "description": "Current dining window in minutes, and the 30-minute slot size."
+          },
+          "response": [
+            {
+              "name": "200 current dining window",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/table_reservations/estimated_duration",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "table_reservations",
+                    "estimated_duration"
+                  ]
+                },
+                "description": "Current dining window in minutes, and the 30-minute slot size."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"estimated_duration_minutes\": 120,\n  \"slot_minutes\": 30\n}"
+            }
+          ]
+        },
+        {
+          "name": "Set the dining window",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/table_reservations/estimated_duration",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "table_reservations",
+                "estimated_duration"
+              ]
+            },
+            "description": "Changes how long a table stays held after its arrival slot. `estimated_duration_minutes` must be a positive multiple of 30, up to 720.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estimated_duration_minutes\": 120\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "200 dining window updated",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/table_reservations/estimated_duration",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "table_reservations",
+                    "estimated_duration"
+                  ]
+                },
+                "description": "Changes how long a table stays held after its arrival slot. `estimated_duration_minutes` must be a positive multiple of 30, up to 720.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"estimated_duration_minutes\": 120\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"estimated_duration_minutes\": 120,\n  \"slot_minutes\": 30\n}"
+            },
+            {
+              "name": "422 duration is not a 30-minute multiple",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/table_reservations/estimated_duration",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "table_reservations",
+                    "estimated_duration"
+                  ]
+                },
+                "description": "Changes how long a table stays held after its arrival slot. `estimated_duration_minutes` must be a positive multiple of 30, up to 720.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"estimated_duration_minutes\": 120\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Unprocessable Entity",
+              "code": 422,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"errors\": [\n    \"Estimated duration minutes must be a multiple of 30\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get a table reservation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/table_reservations/{{tableReservationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "table_reservations",
+                "{{tableReservationId}}"
+              ]
+            },
+            "description": "Return one table reservation."
+          },
+          "response": [
+            {
+              "name": "200 reservation returned",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/table_reservations/{{tableReservationId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "table_reservations",
+                    "{{tableReservationId}}"
+                  ]
+                },
+                "description": "Return one table reservation."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"type\": \"TableReservation\",\n  \"location\": \"Dining Room\",\n  \"reservation_date\": \"2026-10-18\",\n  \"start_time\": \"18:00\",\n  \"estimated_end_time\": \"20:00\",\n  \"number_of_people\": 4,\n  \"full_name\": \"Ava Walsh\",\n  \"email\": \"ava.walsh@example.com\",\n  \"phone\": \"+353871234567\",\n  \"occasion\": \"Anniversary\",\n  \"special_requests\": \"Window seat if possible\",\n  \"marketing_opt_in\": false,\n  \"table_id\": 1,\n  \"table_name\": \"Table 4\",\n  \"active\": true,\n  \"estimated_duration_minutes\": 120\n}"
+            },
+            {
+              "name": "404 reservation not found",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/table_reservations/{{tableReservationId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "table_reservations",
+                    "{{tableReservationId}}"
+                  ]
+                },
+                "description": "Return one table reservation."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Deactivate a table reservation",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/table_reservations/{{tableReservationId}}/deactivate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "table_reservations",
+                "{{tableReservationId}}",
+                "deactivate"
+              ]
+            },
+            "description": "Keeps the reservation on record and marks the table available for that arrival slot."
+          },
+          "response": [
+            {
+              "name": "200 reservation deactivated",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/table_reservations/{{tableReservationId}}/deactivate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "table_reservations",
+                    "{{tableReservationId}}",
+                    "deactivate"
+                  ]
+                },
+                "description": "Keeps the reservation on record and marks the table available for that arrival slot."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"type\": \"TableReservation\",\n  \"location\": \"Dining Room\",\n  \"reservation_date\": \"2026-10-18\",\n  \"start_time\": \"18:00\",\n  \"estimated_end_time\": \"20:00\",\n  \"number_of_people\": 4,\n  \"full_name\": \"Ava Walsh\",\n  \"email\": \"ava.walsh@example.com\",\n  \"phone\": \"+353871234567\",\n  \"occasion\": \"Anniversary\",\n  \"special_requests\": \"Window seat if possible\",\n  \"marketing_opt_in\": false,\n  \"table_id\": 1,\n  \"table_name\": \"Table 4\",\n  \"active\": false,\n  \"estimated_duration_minutes\": 120\n}"
+            },
+            {
+              "name": "404 reservation not found",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/table_reservations/{{tableReservationId}}/deactivate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "table_reservations",
+                    "{{tableReservationId}}",
+                    "deactivate"
+                  ]
+                },
+                "description": "Keeps the reservation on record and marks the table available for that arrival slot."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete a table reservation",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/table_reservations/{{tableReservationId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "table_reservations",
+                "{{tableReservationId}}"
+              ]
+            },
+            "description": "Delete a reservation and free the table for that slot. Response body is empty."
+          },
+          "response": [
+            {
+              "name": "204 reservation deleted",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/table_reservations/{{tableReservationId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "table_reservations",
+                    "{{tableReservationId}}"
+                  ]
+                },
+                "description": "Delete a reservation and free the table for that slot. Response body is empty."
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": ""
+            },
+            {
+              "name": "404 reservation not found",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/admin/table_reservations/{{tableReservationId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "table_reservations",
+                    "{{tableReservationId}}"
+                  ]
+                },
+                "description": "Delete a reservation and free the table for that slot. Response body is empty."
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": \"Record not found\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

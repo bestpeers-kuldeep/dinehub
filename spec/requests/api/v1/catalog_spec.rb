@@ -138,7 +138,7 @@ RSpec.describe "Public catalog API", type: :request do
 
       response "200", "specials returned" do
         before do
-          menu = create(:menu, category_type: :specials)
+          menu = create(:menu, name: "Specials")
           category = create(:menu_category, menu: menu)
           create(:menu_item, menu_category: category, start_at: Date.current, end_at: 1.day.from_now)
         end
