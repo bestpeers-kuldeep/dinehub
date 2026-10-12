@@ -168,10 +168,14 @@ module Payments
 
         def trigger_delivery_if_required(payment)
           return unless payment.successful?
-          return if payment.order.blank? || payment.order.delivery_address.blank?
-          return if payment.order.delivery.present?
 
-          Deliveries::PlaceDeliveryService.new(payment.order).call
+          order = payment.order
+          return if order.blank? || order.delivery_address.blank?
+          return if order.delivery&.external_order_id.present?
+
+          Deliveries::PlaceDeliveryService.new(order).call
+        rescue StandardError => e
+          Rails.logger.error("Borzo placement failed for order #{payment.order_id}: #{e.message}")
         end
       end
     end

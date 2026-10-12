@@ -957,6 +957,10 @@ components:
           "$ref": "#/components/schemas/AdminOrderPayment"
         user:
           "$ref": "#/components/schemas/AdminOrderUser"
+        delivery:
+          nullable: true
+          allOf:
+          - "$ref": "#/components/schemas/Delivery"
     Delivery:
       type: object
       properties:
@@ -973,6 +977,34 @@ components:
           type: string
           nullable: true
         external_order_id:
+          type: string
+          nullable: true
+        external_delivery_id:
+          type: string
+          nullable: true
+        rider_name:
+          type: string
+          nullable: true
+        rider_phone:
+          type: string
+          nullable: true
+        rider_latitude:
+          type: string
+          nullable: true
+        rider_longitude:
+          type: string
+          nullable: true
+    OrderTracking:
+      type: object
+      properties:
+        order_id:
+          type: integer
+        order_status:
+          "$ref": "#/components/schemas/OrderStatus"
+        delivery:
+          nullable: true
+          "$ref": "#/components/schemas/Delivery"
+        error:
           type: string
           nullable: true
     CheckoutRequest:
@@ -1913,6 +1945,81 @@ paths:
             application/json:
               schema:
                 "$ref": "#/components/schemas/AdminOrder"
+        '404':
+          description: order not found
+        '401':
+          description: unauthorized
+    patch:
+      summary: Update an order status
+      description: Uses the same kitchen transitions as the customer endpoint.
+        Cancelling an order also cancels the open Borzo delivery. Borzo does
+        not accept other merchant status changes; those stay on this order.
+      tags:
+      - Admin orders
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/OrderStatusRequest"
+      responses:
+        '200':
+          description: status updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AdminOrder"
+        '422':
+          description: status change is not allowed, or Borzo rejected the cancellation
+        '404':
+          description: order not found
+        '401':
+          description: unauthorized
+  "/api/v1/admin/orders/{id}/tracking":
+    get:
+      summary: Refresh and return live Borzo tracking
+      description: Loads the Borzo order and courier location, stores them on the
+        delivery, and updates the order status to match.
+      tags:
+      - Admin orders
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: tracking returned
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/OrderTracking"
+        '422':
+          description: delivery has not been placed with Borzo
+        '502':
+          description: Borzo could not be reached
         '404':
           description: order not found
         '401':
@@ -3044,6 +3151,40 @@ paths:
           description: delivery returned
         '404':
           description: order not found
+  "/api/v1/orders/{id}/tracking":
+    get:
+      summary: Refresh and return live Borzo tracking for the current user's order
+      tags:
+      - Deliveries
+      security:
+      - BearerAuth: []
+      - CookieAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: false
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: tracking returned
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/OrderTracking"
+        '422':
+          description: delivery has not been placed with Borzo
+        '502':
+          description: Borzo could not be reached
+        '404':
+          description: order not found
+        '401':
+          description: unauthorized
   "/api/v1/reservations":
     post:
       summary: Create a dining table reservation
