@@ -15,11 +15,9 @@ module Api
         end
 
         payload = JSON.parse(raw_body)
-        provider_delivery = payload["delivery"]
+        return head :bad_request unless payload["delivery"].is_a?(Hash) || payload["order"].is_a?(Hash)
 
-        return head :bad_request unless provider_delivery.is_a?(Hash)
-
-        delivery = find_delivery(provider_delivery)
+        delivery = find_delivery(payload)
 
         # A callback may arrive before the provider IDs have been saved.
         # Ask Borzo to retry rather than acknowledging an unprocessed event.
@@ -65,7 +63,13 @@ module Api
       end
 
 
-      def find_delivery(provider_delivery)
+      def find_delivery(payload)
+        provider_delivery = if payload["delivery"].is_a?(Hash)
+          payload["delivery"]
+        else
+          order_lookup(payload["order"])
+        end
+
         scope = Delivery.where(provider: "borzo")
 
         delivery = if provider_delivery["delivery_id"].present?
@@ -98,6 +102,17 @@ module Api
         end
 
         delivery
+      end
+
+      def order_lookup(order)
+        point = Array(order["points"]).reverse.find { |row| row["delivery_id"].present? || row["client_order_id"].present? } || {}
+
+        {
+          "order_id" => order["order_id"],
+          "delivery_id" => point["delivery_id"],
+          "client_order_id" => point["client_order_id"],
+          "tracking_url" => point["tracking_url"]
+        }
       end
     end
   end

@@ -24,6 +24,8 @@ module Orders
         raise Errors::InvalidStatus, "Cannot change an order from #{@order.status} to #{@status}"
       end
 
+      Deliveries::CancelWithProvider.new(@order).call if @status == "cancelled"
+
       @order.update!(status: @status)
       @order
     end

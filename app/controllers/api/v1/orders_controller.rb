@@ -2,7 +2,7 @@ module Api
   module V1
     class OrdersController < BaseController
       before_action :authenticate_user!
-      before_action :set_order, only: %i[show update]
+      before_action :set_order, only: %i[show update tracking]
 
       def index
         orders = current_user.orders
@@ -35,8 +35,15 @@ module Api
             payment: {}
           }
         )
-      rescue ::Orders::Errors::InvalidStatus, ActionController::ParameterMissing => e
+      rescue ::Orders::Errors::InvalidStatus, Deliveries::Providers::Borzo::Client::Error, ActionController::ParameterMissing => e
         render json: { error: e.message }, status: :unprocessable_entity
+      end
+
+      def tracking
+        result = Deliveries::RefreshTracking.new(@order).call
+        body = Deliveries::TrackingPayload.for(result.order)
+        body[:error] = result.error if result.error.present?
+        render json: body, status: result.http_status
       end
 
       private

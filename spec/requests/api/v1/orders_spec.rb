@@ -134,6 +134,24 @@ RSpec.describe "Orders", type: :request do
     expect(order.reload).to be_ready
   end
 
+  it "refreshes Borzo tracking for the current user's order" do
+    sign_in
+    create(:delivery, order: order, provider: "borzo", status: :requested, external_order_id: "55")
+    client = instance_double(Deliveries::Providers::Borzo::Client)
+    allow(Deliveries::Providers::Borzo::Client).to receive(:new).and_return(client)
+    allow(client).to receive(:get).with("orders", order_id: "55").and_return(
+      "orders" => [ { "order_id" => 55, "status" => "completed", "points" => [] } ]
+    )
+    allow(client).to receive(:get).with("courier", order_id: "55").and_return("courier" => nil)
+
+    get "/api/v1/orders/#{order.id}/tracking"
+
+    expect(response).to have_http_status(:ok)
+    expect(json_body["order_status"]).to eq("completed")
+    expect(order.reload).to be_completed
+    expect(order.delivery.reload).to be_delivered
+  end
+
   it "rejects a status jump and a backward move" do
     sign_in
 

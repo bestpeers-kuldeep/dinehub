@@ -24,6 +24,9 @@ Rails.application.routes.draw do
       end
       resources :delivery_addresses
       resources :orders, only: %i[index show update] do
+        member do
+          get :tracking
+        end
         resource :delivery, only: :show
       end
       resources :payments, only: :create do
@@ -49,7 +52,11 @@ Rails.application.routes.draw do
         resources :menu_categories
         resources :menu_items
         resources :customers
-        resources :orders, only: %i[index show]
+        resources :orders, only: %i[index show update] do
+          member do
+            get :tracking
+          end
+        end
         resources :tables, only: %i[index show create update] do
           member do
             patch :mark_available
