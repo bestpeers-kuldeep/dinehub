@@ -34,7 +34,7 @@ module Payments
               customer_phone: user.phone
             },
             order_meta: {
-              return_url: "#{ENV.fetch("APP_URL")}/api/v1/payments/payment_return?order_id={order_id}",
+              return_url: "#{ENV.fetch("FRONTEND_APP_URL")}/orders",
               notify_url: "#{ENV.fetch("APP_URL")}/api/v1/payments/cashfree/webhook"
             }
           }.to_json
