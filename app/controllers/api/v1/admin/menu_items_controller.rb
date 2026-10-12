@@ -9,9 +9,9 @@ module Api
         before_action :set_menu_item, only: %i[show update destroy]
 
         def index
-          items = MenuItem.order(:name)
+          items = MenuItem.includes(:menu_category).order(:name)
           items = items.where(menu_category_id: params[:menu_category_id]) if params[:menu_category_id].present?
-          render_collection(items)
+          render_collection(items) { |records| records.map { |item| menu_item_json(item) } }
         end
 
         def show
@@ -47,6 +47,10 @@ module Api
 
         def set_menu_item
           @menu_item = MenuItem.find(params[:id])
+        end
+
+        def menu_item_json(item)
+          item.as_json.merge(menu_category_name: item.menu_category.name)
         end
 
         def item_attributes
