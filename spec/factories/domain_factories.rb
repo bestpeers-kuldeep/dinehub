@@ -44,11 +44,6 @@ FactoryBot.define do
 
   factory :menu do
     sequence(:name) { |n| "Menu #{n}" }
-    category_type { :our_menu }
-
-    trait :drinks do
-      category_type { :drinks }
-    end
   end
 
   factory :menu_category do

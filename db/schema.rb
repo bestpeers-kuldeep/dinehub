@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_09_103000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_12_094104) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,16 +42,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_103000) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "administrators", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.string "first_name", null: false
+    t.string "last_name", null: false
+    t.string "password_digest", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_administrators_on_email", unique: true
+  end
+
   create_table "careers", force: :cascade do |t|
     t.text "cover_letter"
     t.datetime "created_at", null: false
     t.string "email", null: false
     t.text "experience", null: false
     t.string "full_name", null: false
+    t.bigint "job_id"
     t.boolean "opt_in", default: false, null: false
     t.string "phone", null: false
     t.string "resume_link"
     t.datetime "updated_at", null: false
+    t.index ["job_id"], name: "index_careers_on_job_id"
   end
 
   create_table "cart_items", force: :cascade do |t|
@@ -144,6 +156,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_103000) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "jobs", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.string "department"
+    t.text "description", null: false
+    t.integer "employment_type", default: 0, null: false
+    t.string "location"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "menu_categories", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "drink_type"
@@ -168,7 +191,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_103000) do
   end
 
   create_table "menus", force: :cascade do |t|
-    t.integer "category_type", default: 0, null: false
     t.datetime "created_at", null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
@@ -236,6 +258,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_103000) do
     t.text "description"
     t.string "duration"
     t.string "email", null: false
+    t.integer "estimated_duration_minutes", default: 120, null: false
     t.string "full_name"
     t.boolean "marketing_opt_in", default: false, null: false
     t.integer "number_of_people"
@@ -245,6 +268,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_103000) do
     t.string "source"
     t.text "special_requests"
     t.time "start_time", null: false
+    t.integer "status", default: 0, null: false
     t.bigint "table_id"
     t.string "type", default: "TableReservation", null: false
     t.datetime "updated_at", null: false
@@ -292,6 +316,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_09_103000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "careers", "jobs"
   add_foreign_key "cart_items", "carts"
   add_foreign_key "cart_items", "menu_items"
   add_foreign_key "carts", "users"

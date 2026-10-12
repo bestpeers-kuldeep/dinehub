@@ -28,7 +28,7 @@ module Api
       end
 
       def build_week_specials(start_date, end_date)
-        menu = Menu.specials.first
+        menu = Menu.find_by(name: "Specials")
         menu_items = if menu
           MenuItem
             .joins(:menu_category)
@@ -43,7 +43,7 @@ module Api
         {
           start_date: start_date.iso8601,
           end_date: end_date.iso8601,
-          menu: menu && { id: menu.id, name: menu.name, category_type: menu.category_type },
+          menu: menu && { id: menu.id, name: menu.name },
           menu_items: menu_items.map { |item| serialize_item(item) }
         }
       end
