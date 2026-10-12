@@ -165,6 +165,9 @@ components:
           nullable: true
         menu_category_id:
           type: integer
+        menu_category_name:
+          type: string
+          description: Category name. Returned by the admin menu item list.
         image_url:
           type: string
           nullable: true
